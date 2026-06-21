@@ -3,161 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sylia Adèle — Designer créative</title>
-  <meta name="description" content="Portfolio de Sylia Adèle — designer créative. Projets, compétences et contact." />
+  <title>Sylia Adèle Lakrib — Site en construction</title>
+  <meta name="description" content="Le nouveau portfolio de Sylia Adèle Lakrib, creative & brand designer, arrive bientôt." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --ink: #0c0c14;
+      --muted: #5b5b6b;
+      --blue: #3b3df0;     /* bleu électrique du CV */
+      --magenta: #b13ce0;  /* violet / magenta */
+      --lime: #c7f53a;     /* vert lime */
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: "Sora", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 2rem 1.5rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===== Dégradé mesh (DA du CV) ===== */
+    .mesh {
+      position: fixed;
+      inset: -20% -10%;
+      z-index: 0;
+      filter: blur(70px);
+      opacity: .9;
+      background:
+        radial-gradient(40% 45% at 18% 22%, var(--blue) 0%, transparent 60%),
+        radial-gradient(45% 50% at 78% 28%, var(--lime) 0%, transparent 62%),
+        radial-gradient(55% 55% at 50% 75%, var(--magenta) 0%, transparent 60%),
+        radial-gradient(40% 45% at 12% 88%, var(--lime) 0%, transparent 60%);
+      animation: drift 16s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      0%   { transform: scale(1)   translate(0, 0); }
+      50%  { transform: scale(1.08) translate(2%, -2%); }
+      100% { transform: scale(1.04) translate(-2%, 2%); }
+    }
+
+    /* voile blanc pour garder le texte lisible */
+    .veil {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: radial-gradient(75% 70% at 50% 50%, rgba(255,255,255,.78) 0%, rgba(255,255,255,.55) 55%, rgba(255,255,255,.35) 100%);
+    }
+
+    /* ===== Contenu ===== */
+    .card {
+      position: relative;
+      z-index: 2;
+      width: min(760px, 100%);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: rgba(59, 61, 240, .08);
+      border: 1px solid rgba(59, 61, 240, .25);
+      padding: .5rem 1rem;
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
+    }
+
+    .badge .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--lime);
+      box-shadow: 0 0 0 0 rgba(177, 60, 224, .55);
+      animation: pulse 1.8s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(177, 60, 224, .55); }
+      70%  { box-shadow: 0 0 0 12px rgba(177, 60, 224, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(177, 60, 224, 0); }
+    }
+
+    .name {
+      font-family: "Playfair Display", serif;
+      font-weight: 900;
+      line-height: .98;
+      letter-spacing: -0.5px;
+      margin: 1.6rem 0 0.9rem;
+      font-size: clamp(3rem, 11vw, 6.5rem);
+    }
+    .name em {
+      font-style: italic;
+      font-weight: 700;
+    }
+
+    .role {
+      font-family: "Sora", sans-serif;
+      font-weight: 800;
+      color: var(--blue);
+      font-size: clamp(1.05rem, 3.4vw, 1.7rem);
+      line-height: 1.25;
+      letter-spacing: -0.2px;
+    }
+    .role .sep { opacity: .45; padding: 0 .35rem; }
+
+    .message {
+      max-width: 30rem;
+      margin: 1.8rem auto 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.65;
+    }
+
+    /* barre de progression décorative */
+    .progress {
+      width: min(320px, 80%);
+      height: 6px;
+      margin: 2.2rem auto 0;
+      border-radius: 999px;
+      background: rgba(12, 12, 20, .08);
+      overflow: hidden;
+    }
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 40%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--magenta), var(--lime));
+      animation: load 2.4s ease-in-out infinite;
+    }
+    @keyframes load {
+      0%   { transform: translateX(-110%); }
+      100% { transform: translateX(310%); }
+    }
+
+    /* ===== Liens contact ===== */
+    .links {
+      margin-top: 2.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .8rem;
+    }
+    .links a {
+      text-decoration: none;
+      font-weight: 600;
+      font-size: .95rem;
+      padding: .7rem 1.3rem;
+      border-radius: 999px;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .links a.primary {
+      color: #fff;
+      background: linear-gradient(120deg, var(--blue), var(--magenta));
+      box-shadow: 0 12px 28px rgba(59, 61, 240, .28);
+    }
+    .links a.ghost {
+      color: var(--ink);
+      border: 1px solid rgba(12, 12, 20, .18);
+    }
+    .links a:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 34px rgba(59, 61, 240, .3);
+    }
+
+    .foot {
+      margin-top: 2.6rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mesh, .badge .dot, .progress span { animation: none; }
+    }
+  </style>
 </head>
 <body>
-  <!-- Animated background blobs -->
-  <div class="bg-blobs" aria-hidden="true">
-    <span class="blob blob-1"></span>
-    <span class="blob blob-2"></span>
-    <span class="blob blob-3"></span>
-  </div>
+  <div class="mesh" aria-hidden="true"></div>
+  <div class="veil" aria-hidden="true"></div>
 
-  <!-- Navigation -->
-  <header class="nav" id="nav">
-    <a href="#accueil" class="logo">Sylia<span>Adèle</span></a>
-    <nav class="nav-links" id="navLinks">
-      <a href="#apropos">À propos</a>
-      <a href="#projets">Projets</a>
-      <a href="#competences">Compétences</a>
-      <a href="#contact">Contact</a>
+  <main class="card">
+    <span class="badge"><span class="dot"></span> Site en construction</span>
+
+    <h1 class="name">Sylia <em>Adèle</em> Lakrib</h1>
+
+    <p class="role">
+      Creative designer <span class="sep">·</span>
+      Brand designer <span class="sep">·</span>
+      Illustrator
+    </p>
+
+    <p class="message">
+      Mon nouveau portfolio est en cours de création.
+      En attendant, n'hésitez pas à me contacter — je réponds rapidement&nbsp;:)
+    </p>
+
+    <div class="progress" aria-hidden="true"><span></span></div>
+
+    <nav class="links">
+      <a class="primary" href="mailto:sylia.adele.lakrib@gmail.com">✉️ Me contacter</a>
+      <a class="ghost" href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener">Portfolio actuel</a>
+      <a class="ghost" href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="ghost" href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">Instagram</a>
     </nav>
-    <button class="burger" id="burger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </header>
 
-  <!-- Hero -->
-  <section class="hero" id="accueil">
-    <p class="hero-eyebrow">✦ Designer créative</p>
-    <h1 class="hero-title">Je donne vie à<br /><span class="gradient-text">vos idées visuelles</span></h1>
-    <p class="hero-sub">Direction artistique, identité de marque et design d'interfaces.
-      Je crée des univers qui marquent les esprits.</p>
-    <div class="hero-cta">
-      <a href="#projets" class="btn btn-primary">Voir mes projets</a>
-      <a href="#contact" class="btn btn-ghost">Me contacter</a>
-    </div>
-  </section>
+    <p class="foot">© <span id="year"></span> Sylia Adèle Lakrib — Paris</p>
+  </main>
 
-  <!-- À propos -->
-  <section class="section" id="apropos">
-    <div class="section-head">
-      <span class="tag">01 — À propos</span>
-      <h2>Bonjour, moi c'est <span class="gradient-text">Sylia Adèle</span></h2>
-    </div>
-    <div class="about">
-      <div class="about-photo">
-        <!-- Remplace par ta photo : place-la dans le dossier et change le src -->
-        <div class="photo-placeholder">SA</div>
-      </div>
-      <div class="about-text">
-        <p>Designer passionnée par la création visuelle, j'accompagne marques et
-          créateurs pour transformer leurs idées en expériences mémorables.</p>
-        <p>De l'identité visuelle au design d'interface, j'aime mêler couleur,
-          mouvement et sens pour créer des projets qui se démarquent.</p>
-        <div class="about-stats">
-          <div><strong>+30</strong><span>Projets réalisés</span></div>
-          <div><strong>5 ans</strong><span>D'expérience</span></div>
-          <div><strong>100%</strong><span>Sur-mesure</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Projets -->
-  <section class="section" id="projets">
-    <div class="section-head">
-      <span class="tag">02 — Projets</span>
-      <h2>Mes <span class="gradient-text">réalisations</span></h2>
-    </div>
-    <div class="projects">
-      <article class="project">
-        <div class="project-thumb thumb-a"></div>
-        <div class="project-body">
-          <h3>Identité de marque</h3>
-          <p>Logo, charte graphique et déclinaisons pour une marque émergente.</p>
-          <div class="project-tags"><span>Branding</span><span>Logo</span></div>
-        </div>
-      </article>
-      <article class="project">
-        <div class="project-thumb thumb-b"></div>
-        <div class="project-body">
-          <h3>Design d'application</h3>
-          <p>Interface mobile complète, du wireframe au prototype interactif.</p>
-          <div class="project-tags"><span>UI/UX</span><span>Mobile</span></div>
-        </div>
-      </article>
-      <article class="project">
-        <div class="project-thumb thumb-c"></div>
-        <div class="project-body">
-          <h3>Direction artistique</h3>
-          <p>Campagne visuelle et univers graphique pour les réseaux sociaux.</p>
-          <div class="project-tags"><span>Art direction</span><span>Social</span></div>
-        </div>
-      </article>
-      <article class="project">
-        <div class="project-thumb thumb-d"></div>
-        <div class="project-body">
-          <h3>Site vitrine</h3>
-          <p>Conception web et maquette responsive pour une boutique en ligne.</p>
-          <div class="project-tags"><span>Web</span><span>E-commerce</span></div>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- Compétences -->
-  <section class="section" id="competences">
-    <div class="section-head">
-      <span class="tag">03 — Compétences</span>
-      <h2>Ce que je <span class="gradient-text">maîtrise</span></h2>
-    </div>
-    <div class="skills">
-      <div class="skill-card">
-        <h3>🎨 Design graphique</h3>
-        <ul><li>Identité visuelle</li><li>Logo &amp; branding</li><li>Print &amp; édition</li></ul>
-      </div>
-      <div class="skill-card">
-        <h3>📱 UI / UX</h3>
-        <ul><li>Wireframing</li><li>Prototypage</li><li>Design system</li></ul>
-      </div>
-      <div class="skill-card">
-        <h3>🛠️ Outils</h3>
-        <ul><li>Figma</li><li>Photoshop &amp; Illustrator</li><li>After Effects</li></ul>
-      </div>
-      <div class="skill-card">
-        <h3>✨ Direction artistique</h3>
-        <ul><li>Moodboard</li><li>Univers visuel</li><li>Création de contenu</li></ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact -->
-  <section class="section section-contact" id="contact">
-    <div class="section-head">
-      <span class="tag">04 — Contact</span>
-      <h2>Travaillons <span class="gradient-text">ensemble</span></h2>
-      <p class="contact-intro">Un projet en tête ? Écris-moi, je réponds rapidement.</p>
-    </div>
-    <div class="contact-actions">
-      <a href="mailto:contact@syliaadele.com" class="btn btn-primary">✉️ contact@syliaadele.com</a>
-    </div>
-    <div class="socials">
-      <a href="#" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="#" target="_blank" rel="noopener">Instagram</a>
-      <a href="#" target="_blank" rel="noopener">Behance</a>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <p>© <span id="year"></span> Sylia Adèle — Conçu avec ❤️ · syliaadele.com</p>
-  </footer>
-
-  <script src="script.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
