@@ -341,20 +341,63 @@ if (!calmMotion.matches) {
   window.addEventListener("blur", release);
 })();
 
-// ===== Work list — accordion, one row open at a time =====
-const rows = document.querySelectorAll(".row");
-rows.forEach((row) => {
-  const btn = row.querySelector(".row-btn");
-  btn.addEventListener("click", () => {
-    const willOpen = !row.classList.contains("open");
-    rows.forEach((other) => {
-      other.classList.remove("open");
-      other.querySelector(".row-btn").setAttribute("aria-expanded", "false");
-    });
-    row.classList.toggle("open", willOpen);
-    btn.setAttribute("aria-expanded", String(willOpen));
+// ===== Work list — cursor-following project preview =====
+// Each row carries its cover in data-cover/data-srcset. Images are
+// created once on first hover and kept, so re-hovering is instant.
+(function workPreview() {
+  const preview = document.getElementById("preview");
+  const rows = document.querySelectorAll("#workList .row-btn");
+  if (!preview || !rows.length) return;
+  if (!window.matchMedia("(pointer: fine)").matches) return;
+
+  const loaded = new Map();
+  let current = null;
+  let x = 0,
+    y = 0,
+    frame = null;
+
+  const draw = () => {
+    preview.style.translate = `${x}px ${y}px`;
+    frame = null;
+  };
+
+  function show(row) {
+    let img = loaded.get(row);
+    if (!img) {
+      img = new Image();
+      img.src = row.dataset.cover;
+      if (row.dataset.srcset) img.srcset = row.dataset.srcset;
+      img.sizes = "300px";
+      img.alt = "";
+      img.decoding = "async";
+      preview.appendChild(img);
+      loaded.set(row, img);
+    }
+    if (current && current !== img) current.classList.remove("on");
+    // next frame, so a freshly created image transitions in
+    requestAnimationFrame(() => img.classList.add("on"));
+    current = img;
+    preview.classList.add("on");
+  }
+
+  rows.forEach((row) => {
+    row.addEventListener("mouseenter", () => show(row));
+    row.addEventListener("mouseleave", () => preview.classList.remove("on"));
+    // keyboard users get the preview too
+    row.addEventListener("focus", () => show(row));
+    row.addEventListener("blur", () => preview.classList.remove("on"));
   });
-});
+
+  window.addEventListener(
+    "mousemove",
+    (e) => {
+      x = e.clientX + 110;
+      y = e.clientY;
+      if (!frame) frame = requestAnimationFrame(draw);
+    },
+    { passive: true }
+  );
+})();
 
 // ===== Custom arrow cursor + live coordinates =====
 const cursor = document.getElementById("cursor");
@@ -386,7 +429,25 @@ if (fine) {
 }
 
 // ===== Reveal on scroll =====
-document.querySelectorAll(".block, .foot > *").forEach((el) => el.classList.add("rv"));
+document.querySelectorAll(".block").forEach((el) => el.classList.add("rv"));
+
+// The contact finale animates as one piece, so it gets its own observer
+// with a higher threshold — it should fire when you've committed to it,
+// not as the first pixel appears.
+const finale = document.querySelector(".foot--big");
+if (finale) {
+  new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("in");
+          obs.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.25 }
+  ).observe(finale);
+}
 
 const io = new IntersectionObserver(
   (entries) => {

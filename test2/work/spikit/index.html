@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spikit — Sylia Adèle Lakrib</title>
+  <meta name="description" content="Website design for a conversational AI platform — a bright gradient interface, clear hierarchy and a layout built to explain a technical product simply." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Pacifico&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../sky.css" />
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="../../work.css" />
+</head>
+<body>
+  <div class="sky" id="sky" aria-hidden="true"></div>
+  <div class="grid" id="grid" aria-hidden="true"></div>
+
+  <header class="top">
+    <a href="../../index.html" class="wordmark">SYLIA.ADÈLE</a>
+    <nav class="top-nav">
+      <a href="../../work/index.html">WORK</a>
+      <a href="../../index.html#contact">CONTACT</a>
+      <button type="button" id="theme">THEME</button>
+      <button type="button" id="lang">LANG<span class="br">[</span><span id="langVal">EN</span><span class="br">]</span></button>
+      <button type="button" id="sound" aria-pressed="false">SOUND<span class="br">[</span><span id="soundVal">OFF</span><span class="br">]</span></button>
+    </nav>
+  </header>
+
+  <main class="project">
+    <header class="project-head">
+      <a class="back mono" href="../index.html"><span aria-hidden="true">←</span> <span data-fr="TOUS LES PROJETS">ALL WORK</span></a>
+      <h1 class="project-title">Spikit</h1>
+      <ul class="project-tags mono">
+        <li data-fr="WEB · UI DESIGN">WEB · UI DESIGN</li>
+        <li data-fr="SAAS">SAAS</li>
+        <li>1 <span data-fr="VISUELS">SHOTS</span></li>
+      </ul>
+      <p class="project-lead" data-fr="Design du site d'une plateforme d'IA conversationnelle — interface en dégradés lumineux, hiérarchie claire et mise en page pensée pour expliquer simplement un produit technique.">Website design for a conversational AI platform — a bright gradient interface, clear hierarchy and a layout built to explain a technical product simply.</p>
+    </header>
+
+    <div class="shots">
+      <figure class="shot rv">
+        <img src="img/01.jpg" srcset="img/01-sm.jpg 600w, img/01.jpg 1200w"
+             sizes="(max-width: 900px) 94vw, 82vw"
+             alt="Spikit — 1" loading="eager" decoding="async" />
+      </figure>
+    </div>
+
+    <nav class="project-nav mono">
+      <a href="../happy-pooch/index.html"><span aria-hidden="true">←</span> Happy Pooch</a>
+      <a href="../chillin/index.html">Chillin <span aria-hidden="true">→</span></a>
+    </nav>
+  </main>
+
+  <footer class="foot">
+    <p class="mono dim colophon">© <span id="year"></span> SYLIA ADÈLE LAKRIB — <span data-fr="CONÇU À PARIS">DESIGNED IN PARIS</span></p>
+  </footer>
+
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <svg viewBox="0 0 32 36" width="34" height="38">
+      <defs>
+        <linearGradient id="curGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8fc0f5" />
+          <stop offset="45%" stop-color="#4a8fe0" />
+          <stop offset="100%" stop-color="#2b62b8" />
+        </linearGradient>
+      </defs>
+      <path d="M3 2 L29 17 L17 20 L12 33 Z" fill="url(#curGrad)" stroke="rgba(255,255,255,.55)" stroke-width="1.2" stroke-linejoin="round" />
+    </svg>
+  </div>
+
+  <script src="../../sky.js"></script>
+  <script src="../../sound.js"></script>
+  <script src="../../work.js"></script>
+</body>
+</html>

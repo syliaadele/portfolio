@@ -117,6 +117,29 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   font-size: .78rem;
   letter-spacing: .04em;
 }
+/* Sound on: a small equaliser next to the label so the state reads at a
+   glance, not just from the word inside the brackets. */
+#sound.is-on::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 7px;
+  margin-left: .45rem;
+  vertical-align: baseline;
+  background: currentColor;
+  box-shadow: 5px 0 0 currentColor, 10px 0 0 currentColor;
+  animation: eq 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes eq {
+  from { height: 4px; box-shadow: 5px 0 0 currentColor, 10px 0 0 currentColor; opacity: .55; }
+  to   { height: 9px; box-shadow: 5px 0 0 currentColor, 10px 0 0 currentColor; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sound.is-on::after { animation: none; }
+}
+
 /* Hover draws a thin oval around the label. It lives on a pseudo-element
    with negative insets, so nothing in the bar shifts when it appears. */
 .top-nav a,
@@ -242,12 +265,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   will-change: transform;
 }
 
-/* Idle float, independent of the cursor */
+/* Idle float, independent of the cursor.
+   Opacity lives here rather than on .hello, whose own opacity is driven
+   by the entrance animation. */
 .hello-drift {
   position: absolute;
   inset: 0;
   animation: helloDrift 19s ease-in-out infinite;
+  transition: opacity .6s var(--ease);
 }
+
+/* Softer against a night sky, so the stars stay readable through it */
+:root[data-theme="dark"] .hello-drift { opacity: .45; }
 
 /* Real refraction of the sky behind, clipped to the letterforms.
    Low blur on purpose — clear glass distorts, frosted glass fogs. */
@@ -323,7 +352,7 @@ main { position: relative; z-index: 2; }
 
 .row-btn {
   display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr) 10rem 6rem 2rem;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 8rem 2rem;
   align-items: center;
   gap: 1rem;
   width: 100%;
@@ -333,7 +362,19 @@ main { position: relative; z-index: 2; }
 }
 .row-btn:hover { background: var(--panel); padding-left: 1.2rem; }
 
-.row-i, .row-cat, .row-year { color: var(--ink-2); letter-spacing: .08em; }
+.row-i, .row-cat, .row-year, .row-meta { color: var(--ink-2); letter-spacing: .08em; }
+.row-meta { text-align: right; }
+
+.work-all {
+  display: inline-block;
+  margin-top: 2rem;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line);
+  letter-spacing: .1em;
+  font-size: .76rem;
+  transition: border-color .25s, transform .35s var(--ease);
+}
+.work-all:hover { border-color: var(--ink); transform: translateX(3px); }
 
 .row-title {
   font-size: clamp(1.5rem, 3.4vw, 2.6rem);
@@ -413,6 +454,172 @@ main { position: relative; z-index: 2; }
 }
 .mega.small { font-size: clamp(1.9rem, 6vw, 5.4rem); }
 
+/* --- contact finale --------------------------------------------- */
+/* Only the home page gets the full-height treatment; work pages keep
+   the plain .foot with just a colophon. */
+
+.foot--big {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100svh;
+  overflow: hidden;
+  border-top: 0;
+}
+
+/* The sky opens up behind the section as it comes into view */
+.foot-glow {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 140vmax;
+  height: 140vmax;
+  translate: -50% -50%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, .85) 0%,
+    rgba(214, 234, 252, .55) 26%,
+    rgba(160, 200, 240, .18) 48%,
+    transparent 68%
+  );
+  opacity: 0;
+  scale: .55;
+  transition: opacity 1.6s var(--ease), scale 2.2s var(--ease);
+}
+.foot--big.in .foot-glow { opacity: 1; scale: 1; }
+
+:root[data-theme="dark"] .foot-glow {
+  background: radial-gradient(
+    circle,
+    rgba(90, 150, 220, .38) 0%,
+    rgba(40, 90, 150, .22) 30%,
+    transparent 66%
+  );
+}
+
+.foot-inner { position: relative; z-index: 1; }
+
+.foot-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-size: .7rem;
+  letter-spacing: .16em;
+  color: var(--ink-2);
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity .8s var(--ease), translate .8s var(--ease);
+}
+.foot--big.in .foot-label { opacity: 1; translate: 0 0; }
+
+.foot-label .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3f9d5c;
+  box-shadow: 0 0 0 0 rgba(63, 157, 92, .55);
+  animation: availPulse 2.6s ease-out infinite;
+}
+
+@keyframes availPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(63, 157, 92, .5); }
+  70%  { box-shadow: 0 0 0 9px rgba(63, 157, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(63, 157, 92, 0); }
+}
+
+/* Headline — each line rises out of its own mask */
+.foot-title {
+  margin: 1.6rem 0 clamp(2rem, 5vw, 3.2rem);
+  font-size: clamp(2.5rem, 10.5vw, 10rem);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+
+.fl { display: block; overflow: hidden; padding-bottom: .04em; }
+.fl > span {
+  display: block;
+  translate: 0 105%;
+  transition: translate 1.15s var(--ease);
+  transition-delay: calc(var(--i) * .13s + .1s);
+}
+.foot--big.in .fl > span { translate: 0 0; }
+
+/* Email — a glass plate, echoing the nav pills and the hello */
+.foot-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1rem, 2.2vw, 1.5rem) clamp(1.3rem, 3vw, 2.2rem);
+  border: 1px solid var(--pill-line);
+  border-radius: 999px;
+  background: var(--pill);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px -12px var(--pill-shadow);
+  opacity: 0;
+  translate: 0 22px;
+  transition:
+    opacity .9s var(--ease) .5s,
+    translate .9s var(--ease) .5s,
+    transform .45s var(--ease),
+    box-shadow .45s var(--ease),
+    background .35s var(--ease);
+}
+.foot--big.in .foot-mail { opacity: 1; translate: 0 0; }
+
+.foot-mail:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px -14px var(--pill-shadow);
+}
+
+.foot-mail-label { font-size: .66rem; letter-spacing: .16em; color: var(--ink-2); }
+.foot-mail-addr {
+  font-size: clamp(.85rem, 1.9vw, 1.25rem);
+  letter-spacing: .01em;
+}
+.foot-mail-arrow {
+  font-size: 1.2rem;
+  transition: transform .45s var(--ease);
+}
+.foot-mail:hover .foot-mail-arrow { transform: translateX(6px); }
+
+.foot-links {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  opacity: 0;
+  translate: 0 16px;
+  transition: opacity .9s var(--ease) .68s, translate .9s var(--ease) .68s;
+}
+.foot--big.in .foot-links { opacity: 1; translate: 0 0; }
+
+.foot--big .colophon {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: clamp(3rem, 8vw, 5rem);
+}
+
+@media (max-width: 700px) {
+  .foot-mail { flex-wrap: wrap; gap: .5rem 1rem; border-radius: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foot-glow,
+  .foot-label,
+  .fl > span,
+  .foot-mail,
+  .foot-links {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    transition: none;
+  }
+  .foot-label .dot { animation: none; }
+}
+
 .mail {
   display: inline-block;
   margin-top: 2rem;
@@ -471,7 +678,7 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   .row-i { grid-area: i; align-self: start; padding-top: .45rem; }
   .row-title { grid-area: title; }
   .row-mark { grid-area: mark; align-self: start; }
-  .row-cat { grid-area: meta; }
+  .row-cat, .row-meta { grid-area: meta; text-align: left; }
   .row-year { display: none; }
   .cursor { display: none; }
 }

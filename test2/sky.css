@@ -75,7 +75,43 @@
   position: absolute;
   inset: 0;
   will-change: transform;
+  transition: opacity .9s ease;
 }
+
+/* --- stars (dark theme only) ------------------------------------- */
+
+.stars {
+  opacity: 0;
+  transition: opacity .9s ease;
+}
+:root[data-theme="dark"] .stars { opacity: 1; }
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  opacity: var(--o0);
+  animation: twinkle var(--tw) ease-in-out infinite alternate;
+}
+
+/* the brighter ones get a faint halo */
+.star[style*="width:2"],
+.star[style*="width:3"] {
+  box-shadow: 0 0 4px rgba(255, 255, 255, .7);
+}
+
+@keyframes twinkle {
+  from { opacity: var(--o0); }
+  to   { opacity: var(--o1); }
+}
+
+/* Fewer clouds at night — these ones sit the dark theme out */
+:root[data-theme="dark"] .cloud--day { display: none; }
+
+/* The ones that remain thin out too. Applied to the layer rather than
+   the clouds, whose own opacity is an inline style: this multiplies
+   with it and keeps each layer's relative depth intact. */
+:root[data-theme="dark"] .sky-layer:not(.stars) { opacity: .42; }
 
 /* --- clouds ------------------------------------------------------ */
 
@@ -112,6 +148,7 @@
 /* --- reduced motion ---------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .cloud-i { animation: none; }
+  .cloud-i, .star { animation: none; }
+  .star { opacity: var(--o1); }
   .sky, .sky-layer, .cloud, .cloud-i { transition: none; }
 }

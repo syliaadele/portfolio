@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Pacifico&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="sky.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="work.css" />
 </head>
 <body>
   <!-- Interactive sky background (built by sky.js) -->
@@ -21,12 +22,13 @@
 
   <!-- Top bar -->
   <header class="top">
-    <a href="#top" class="wordmark">SYLIA.DESIGN</a>
+    <a href="#top" class="wordmark">SYLIA.ADÈLE</a>
     <nav class="top-nav">
       <a href="#work" data-fr="PROJETS">WORK</a>
       <a href="#contact">CONTACT</a>
       <button type="button" id="theme">THEME</button>
       <button type="button" id="lang">LANG<span class="br">[</span><span id="langVal">EN</span><span class="br">]</span></button>
+      <button type="button" id="sound" aria-pressed="false">SOUND<span class="br">[</span><span id="soundVal">OFF</span><span class="br">]</span></button>
     </nav>
   </header>
 
@@ -36,9 +38,9 @@
       <div class="hero-cols">
         <h2 class="discipline" data-fr="Marque &amp;<br />Direction artistique">Brand &amp;<br />Art Direction</h2>
         <p class="mono statement" data-fr="Penser la marque.<br />Créer avec soin.">Thinking in brands.<br />Designing with care.</p>
-        <p class="mono bio" data-fr="Je suis Sylia Adèle Lakrib, designer créative &amp; de marque à Paris. Identité, direction artistique et design d'interfaces. En dehors des projets clients, je dessine des systèmes visuels qui tiennent dans le temps.">I'm Sylia Adèle Lakrib, creative &amp; brand designer in Paris. Identity,
-          art direction and interface design. Outside client work, I build visual
-          systems made to last.</p>
+        <p class="mono bio" data-fr="Je suis Sylia Adèle Lakrib, designer créative &amp; de marque à Paris. Je travaille l'identité de marque, le packaging et la direction artistique — des systèmes visuels pensés pour durer.">I'm Sylia Adèle Lakrib, creative &amp; brand designer in Paris. I work across
+          brand identity, packaging and art direction — building visual systems
+          made to last.</p>
       </div>
 
       <!-- "Hello" as a glass tube wordmark.
@@ -175,70 +177,102 @@
     <section class="block" id="work">
       <div class="block-head mono">
         <span data-fr="PROJETS">SELECTED WORK</span>
-        <span class="dim">04</span>
+        <span class="dim">9</span>
       </div>
 
-      <ul class="list">
+      <ul class="list" id="workList">
         <li class="row">
-          <button class="row-btn" aria-expanded="false">
+          <a class="row-btn" href="work/chillin/index.html"
+             data-cover="work/chillin/img/01-sm.jpg">
             <span class="row-i mono">01</span>
-            <span class="row-title" data-fr="Identité de marque">Brand identity</span>
-            <span class="row-cat mono">BRANDING</span>
-            <span class="row-year mono">2024—25</span>
-            <span class="row-mark mono" aria-hidden="true">+</span>
-          </button>
-          <div class="row-panel"><div class="row-panel-in">
-            <p data-fr="Une identité visuelle complète pour une marque émergente — système de logo, palette, typographie et charte, pensés pour tenir sur tous les supports.">A complete visual identity for an emerging brand — logo system, color
-              world, typography and guidelines, built to hold up across every touchpoint.</p>
-            <ul class="chips mono"><li>LOGO</li><li data-fr="CHARTE">GUIDELINES</li><li>PRINT</li></ul>
-          </div></div>
+            <span class="row-title">Chillin</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
         </li>
 
         <li class="row">
-          <button class="row-btn" aria-expanded="false">
+          <a class="row-btn" href="work/big-jim/index.html"
+             data-cover="work/big-jim/img/01-sm.jpg">
             <span class="row-i mono">02</span>
-            <span class="row-title" data-fr="Design d'application">App design</span>
-            <span class="row-cat mono">UI / UX</span>
-            <span class="row-year mono">2024</span>
-            <span class="row-mark mono" aria-hidden="true">+</span>
-          </button>
-          <div class="row-panel"><div class="row-panel-in">
-            <p data-fr="Une expérience mobile conçue de bout en bout — des parcours utilisateurs aux wireframes, jusqu'à un prototype interactif prêt pour le développement.">A full mobile experience designed end to end — from user flows and
-              wireframes to a polished, interactive prototype ready for development.</p>
-            <ul class="chips mono"><li>MOBILE</li><li>PROTOTYPE</li><li>DESIGN SYSTEM</li></ul>
-          </div></div>
+            <span class="row-title">Big Jim</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
         </li>
 
         <li class="row">
-          <button class="row-btn" aria-expanded="false">
+          <a class="row-btn" href="work/lazy-daizy/index.html"
+             data-cover="work/lazy-daizy/img/01-sm.jpg">
             <span class="row-i mono">03</span>
-            <span class="row-title" data-fr="Direction artistique">Art direction</span>
-            <span class="row-cat mono" data-fr="CAMPAGNE">CAMPAIGN</span>
-            <span class="row-year mono">2023—24</span>
-            <span class="row-mark mono" aria-hidden="true">+</span>
-          </button>
-          <div class="row-panel"><div class="row-panel-in">
-            <p data-fr="Une campagne visuelle et un univers graphique pour les réseaux sociaux — un langage cohérent, pensé pour arrêter le scroll et installer la reconnaissance.">A visual campaign and graphic universe for social media — a consistent
-              language designed to stop the scroll and build recognition.</p>
-            <ul class="chips mono"><li>SOCIAL</li><li data-fr="CONTENU">CONTENT</li><li>MOTION</li></ul>
-          </div></div>
+            <span class="row-title">Lazy Daizy</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
         </li>
 
         <li class="row">
-          <button class="row-btn" aria-expanded="false">
+          <a class="row-btn" href="work/dead-sour/index.html"
+             data-cover="work/dead-sour/img/01-sm.jpg">
             <span class="row-i mono">04</span>
-            <span class="row-title" data-fr="Site vitrine">Showcase website</span>
-            <span class="row-cat mono">WEB</span>
-            <span class="row-year mono">2023</span>
-            <span class="row-mark mono" aria-hidden="true">+</span>
-          </button>
-          <div class="row-panel"><div class="row-panel-in">
-            <p data-fr="Design web et maquette responsive pour une boutique en ligne — une mise en page claire, orientée conversion, qui laisse la place aux produits.">Web design and a responsive mockup for an online store — a clean,
-              conversion-focused layout that leaves room for the products.</p>
-            <ul class="chips mono"><li>E-COMMERCE</li><li>RESPONSIVE</li><li>ART DIRECTION</li></ul>
-          </div></div>
+            <span class="row-title">Dead Sour</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
+        </li>
+
+        <li class="row">
+          <a class="row-btn" href="work/in-a-pickle/index.html"
+             data-cover="work/in-a-pickle/img/01-sm.jpg">
+            <span class="row-i mono">05</span>
+            <span class="row-title">In a Pickle</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
+        </li>
+
+        <li class="row">
+          <a class="row-btn" href="work/foamo/index.html"
+             data-cover="work/foamo/img/01-sm.jpg">
+            <span class="row-i mono">06</span>
+            <span class="row-title">Foamo</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
+        </li>
+
+        <li class="row">
+          <a class="row-btn" href="work/flutter/index.html"
+             data-cover="work/flutter/img/01-sm.jpg">
+            <span class="row-i mono">07</span>
+            <span class="row-title">Flutter</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PACKAGING">BRANDING · PACKAGING</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
+        </li>
+
+        <li class="row">
+          <a class="row-btn" href="work/happy-pooch/index.html"
+             data-cover="work/happy-pooch/img/01-sm.jpg">
+            <span class="row-i mono">08</span>
+            <span class="row-title">Happy Pooch</span>
+            <span class="row-meta mono" data-fr="IDENTITÉ · PRINT">BRANDING · PRINT</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
+        </li>
+
+        <li class="row">
+          <a class="row-btn" href="work/spikit/index.html"
+             data-cover="work/spikit/img/01-sm.jpg">
+            <span class="row-i mono">09</span>
+            <span class="row-title">Spikit</span>
+            <span class="row-meta mono" data-fr="WEB · UI DESIGN">WEB · UI DESIGN</span>
+            <span class="row-mark mono" aria-hidden="true">↗</span>
+          </a>
         </li>
       </ul>
+
+      <a class="work-all mono" href="work/index.html" data-fr="VOIR TOUS LES PROJETS →">SEE ALL WORK →</a>
     </section>
 
     <!-- Expertise -->
@@ -299,15 +333,36 @@
     </section>
   </main>
 
-  <!-- Contact -->
-  <footer class="foot" id="contact">
-    <h2 class="mega small" data-fr="CRÉONS QUELQUE CHOSE<br />D'EXTRAORDINAIRE">LET'S CREATE SOMETHING<br />EXTRAORDINARY</h2>
-    <a class="mail mono" href="mailto:sylia.adele.lakrib@gmail.com">SYLIA.ADELE.LAKRIB@GMAIL.COM</a>
-    <ul class="links mono">
-      <li><a href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LINKEDIN <span aria-hidden="true">↗</span></a></li>
-      <li><a href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">INSTAGRAM <span aria-hidden="true">↗</span></a></li>
-      <li><a href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener">PORTFOLIO <span aria-hidden="true">↗</span></a></li>
-    </ul>
+  <!-- Contact — full-height finale. The sky clears behind it and the
+       headline rises line by line, so the page lands somewhere. -->
+  <footer class="foot foot--big" id="contact">
+    <div class="foot-glow" aria-hidden="true"></div>
+
+    <div class="foot-inner">
+      <span class="foot-label mono">
+        <span class="dot" aria-hidden="true"></span>
+        <span data-fr="DISPONIBLE POUR DE NOUVEAUX PROJETS">AVAILABLE FOR NEW PROJECTS</span>
+      </span>
+
+      <h2 class="foot-title">
+        <span class="fl" style="--i:0"><span data-fr="CRÉONS">LET'S CREATE</span></span>
+        <span class="fl" style="--i:1"><span data-fr="QUELQUE CHOSE">SOMETHING</span></span>
+        <span class="fl" style="--i:2"><span data-fr="D'EXTRAORDINAIRE">EXTRAORDINARY</span></span>
+      </h2>
+
+      <a class="foot-mail" href="mailto:sylia.adele.lakrib@gmail.com">
+        <span class="foot-mail-label mono" data-fr="ÉCRIVEZ-MOI">GET IN TOUCH</span>
+        <span class="foot-mail-addr mono">sylia.adele.lakrib@gmail.com</span>
+        <span class="foot-mail-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <ul class="links mono foot-links">
+        <li><a href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LINKEDIN <span aria-hidden="true">↗</span></a></li>
+        <li><a href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">INSTAGRAM <span aria-hidden="true">↗</span></a></li>
+        <li><a href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener">PORTFOLIO <span aria-hidden="true">↗</span></a></li>
+      </ul>
+    </div>
+
     <p class="mono dim colophon">© <span id="year"></span> SYLIA ADÈLE LAKRIB — <span data-fr="CONÇU À PARIS">DESIGNED IN PARIS</span></p>
   </footer>
 
@@ -324,6 +379,9 @@
     </span>
   </div>
 
+  <!-- Cursor-following project preview -->
+  <div class="preview" id="preview" aria-hidden="true"></div>
+
   <!-- Custom arrow cursor -->
   <div class="cursor" id="cursor" aria-hidden="true">
     <svg viewBox="0 0 32 36" width="34" height="38">
@@ -339,6 +397,7 @@
   </div>
 
   <script src="sky.js"></script>
+  <script src="sound.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

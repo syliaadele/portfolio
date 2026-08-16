@@ -4,233 +4,430 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sylia Adèle Lakrib — Site under construction</title>
-  <meta name="description" content="The new portfolio of Sylia Adèle Lakrib, creative & brand designer, is coming soon." />
+  <meta name="description" content="The new portfolio of Sylia Adèle Lakrib, creative &amp; brand designer, is coming soon." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Pacifico&display=swap" rel="stylesheet" />
+
+  <!-- Shared art direction. These live in test2/ while the new site is
+       still being built there; when it moves to the root, so do they. -->
+  <link rel="stylesheet" href="test2/sky.css" />
+  <link rel="stylesheet" href="test2/style.css" />
 
   <style>
-    :root {
-      --bg: #ffffff;
-      --ink: #0c0c14;
-      --muted: #5b5b6b;
-      --blue: #3b3df0;     /* bleu électrique du CV */
-      --magenta: #b13ce0;  /* violet / magenta */
-      --lime: #c7f53a;     /* vert lime */
-    }
+    /* Page-specific layout only — everything else comes from style.css */
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body { height: 100%; }
-
-    body {
-      font-family: "Sora", system-ui, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 2rem 1.5rem;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* ===== Dégradé mesh (DA du CV) ===== */
-    .mesh {
-      position: fixed;
-      inset: -20% -10%;
-      z-index: 0;
-      filter: blur(70px);
-      opacity: .9;
-      background:
-        radial-gradient(40% 45% at 18% 22%, var(--blue) 0%, transparent 60%),
-        radial-gradient(45% 50% at 78% 28%, var(--lime) 0%, transparent 62%),
-        radial-gradient(55% 55% at 50% 75%, var(--magenta) 0%, transparent 60%),
-        radial-gradient(40% 45% at 12% 88%, var(--lime) 0%, transparent 60%);
-      animation: drift 16s ease-in-out infinite alternate;
-    }
-
-    @keyframes drift {
-      0%   { transform: scale(1)   translate(0, 0); }
-      50%  { transform: scale(1.08) translate(2%, -2%); }
-      100% { transform: scale(1.04) translate(-2%, 2%); }
-    }
-
-    /* voile blanc pour garder le texte lisible */
-    .veil {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      background: radial-gradient(75% 70% at 50% 50%, rgba(255,255,255,.78) 0%, rgba(255,255,255,.55) 55%, rgba(255,255,255,.35) 100%);
-    }
-
-    /* ===== Contenu ===== */
-    .card {
+    .soon {
       position: relative;
       z-index: 2;
-      width: min(760px, 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(100svh - 8rem);
+      padding: 0 var(--pad);
       text-align: center;
     }
 
-    .badge {
+    .soon-inner {
+      position: relative;
+      z-index: 3;
+      max-width: 46rem;
+      margin: 0 auto;
+    }
+
+    /* the glass wordmark sits behind the name, as on the new site */
+    .soon .hello { top: 44%; }
+
+    .soon-badge {
       display: inline-flex;
       align-items: center;
-      gap: .55rem;
-      font-size: .78rem;
-      font-weight: 700;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--blue);
-      background: rgba(59, 61, 240, .08);
-      border: 1px solid rgba(59, 61, 240, .25);
+      gap: .6rem;
       padding: .5rem 1rem;
+      border: 1px solid var(--pill-line);
       border-radius: 999px;
-      backdrop-filter: blur(4px);
+      background: var(--pill);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 6px 18px -8px var(--pill-shadow);
+      font-family: var(--mono);
+      font-size: .66rem;
+      letter-spacing: .16em;
     }
 
-    .badge .dot {
-      width: 9px; height: 9px;
+    .soon-badge .dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--lime);
-      box-shadow: 0 0 0 0 rgba(177, 60, 224, .55);
-      animation: pulse 1.8s ease-out infinite;
+      background: #3f9d5c;
+      animation: soonPulse 2.6s ease-out infinite;
     }
 
-    @keyframes pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(177, 60, 224, .55); }
-      70%  { box-shadow: 0 0 0 12px rgba(177, 60, 224, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(177, 60, 224, 0); }
+    @keyframes soonPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(63, 157, 92, .5); }
+      70%  { box-shadow: 0 0 0 9px rgba(63, 157, 92, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(63, 157, 92, 0); }
     }
 
-    .name {
-      font-family: "Playfair Display", serif;
-      font-weight: 900;
-      line-height: .98;
-      letter-spacing: -0.5px;
-      margin: 1.6rem 0 0.9rem;
-      font-size: clamp(3rem, 11vw, 6.5rem);
-    }
-    .name em {
-      font-style: italic;
-      font-weight: 700;
-    }
-
-    .role {
-      font-family: "Sora", sans-serif;
+    .soon-name {
+      margin: 1.6rem 0 .9rem;
+      font-size: clamp(2.1rem, 7.5vw, 5.5rem);
       font-weight: 800;
-      color: var(--blue);
-      font-size: clamp(1.05rem, 3.4vw, 1.7rem);
-      line-height: 1.25;
-      letter-spacing: -0.2px;
+      line-height: .93;
+      letter-spacing: -.04em;
+      text-transform: uppercase;
     }
-    .role .sep { opacity: .45; padding: 0 .35rem; }
 
-    .message {
-      max-width: 30rem;
+    .soon-role {
+      font-size: .72rem;
+      letter-spacing: .18em;
+      color: var(--ink-2);
+    }
+
+    .soon-msg {
+      max-width: 34rem;
       margin: 1.8rem auto 0;
-      color: var(--muted);
+      color: var(--ink-2);
       font-size: 1.02rem;
       line-height: 1.65;
     }
 
-    /* barre de progression décorative */
-    .progress {
-      width: min(320px, 80%);
-      height: 6px;
-      margin: 2.2rem auto 0;
-      border-radius: 999px;
-      background: rgba(12, 12, 20, .08);
-      overflow: hidden;
-    }
-    .progress span {
-      display: block;
-      height: 100%;
-      width: 40%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--blue), var(--magenta), var(--lime));
-      animation: load 2.4s ease-in-out infinite;
-    }
-    @keyframes load {
-      0%   { transform: translateX(-110%); }
-      100% { transform: translateX(310%); }
-    }
-
-    /* ===== Liens contact ===== */
-    .links {
-      margin-top: 2.4rem;
+    .soon-links {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: .8rem;
-    }
-    .links a {
-      text-decoration: none;
-      font-weight: 600;
-      font-size: .95rem;
-      padding: .7rem 1.3rem;
-      border-radius: 999px;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .links a.primary {
-      color: #fff;
-      background: linear-gradient(120deg, var(--blue), var(--magenta));
-      box-shadow: 0 12px 28px rgba(59, 61, 240, .28);
-    }
-    .links a.ghost {
-      color: var(--ink);
-      border: 1px solid rgba(12, 12, 20, .18);
-    }
-    .links a:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 34px rgba(59, 61, 240, .3);
+      gap: .7rem;
+      margin-top: 2.4rem;
     }
 
-    .foot {
-      margin-top: 2.6rem;
-      font-size: .82rem;
-      color: var(--muted);
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .8rem 1.35rem;
+      border: 1px solid var(--pill-line);
+      border-radius: 999px;
+      background: var(--pill);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 22px -12px var(--pill-shadow);
+      font-family: var(--mono);
+      font-size: .72rem;
+      letter-spacing: .1em;
+      transition: transform .4s var(--ease), box-shadow .4s var(--ease), background .3s var(--ease);
+    }
+
+    .pill:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 34px -14px var(--pill-shadow);
+    }
+
+    .pill.primary {
+      background: rgba(255, 255, 255, .42);
+      border-color: rgba(0, 0, 0, .28);
+    }
+
+    /* staggered entrance */
+    .up {
+      opacity: 0;
+      translate: 0 18px;
+      animation: soonUp .9s var(--ease) forwards;
+      animation-delay: calc(var(--i) * .1s + .25s);
+    }
+
+    @keyframes soonUp {
+      to { opacity: 1; translate: 0 0; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .mesh, .badge .dot, .progress span { animation: none; }
+      .up { opacity: 1; translate: 0 0; animation: none; }
+      .soon-badge .dot { animation: none; }
     }
   </style>
 </head>
 <body>
-  <div class="mesh" aria-hidden="true"></div>
-  <div class="veil" aria-hidden="true"></div>
+  <!-- Interactive sky (built by sky.js) -->
+  <div class="sky" id="sky" aria-hidden="true"></div>
+  <div class="grid" id="grid" aria-hidden="true"></div>
 
-  <main class="card">
-    <span class="badge"><span class="dot"></span> Site under construction</span>
-
-    <h1 class="name">Sylia <em>Adèle</em> Lakrib</h1>
-
-    <p class="role">
-      Creative designer <span class="sep">·</span>
-      Brand designer <span class="sep">·</span>
-      Illustrator
-    </p>
-
-    <p class="message">
-      My new portfolio is currently in the works.
-      In the meantime, feel free to reach out — I'll get back to you quickly&nbsp;:)
-    </p>
-
-    <div class="progress" aria-hidden="true"><span></span></div>
-
-    <nav class="links">
-      <a class="primary" href="mailto:sylia.adele.lakrib@gmail.com">✉️ Contact me</a>
-      <a class="ghost" href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener">Current portfolio</a>
-      <a class="ghost" href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LinkedIn</a>
-      <a class="ghost" href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">Instagram</a>
+  <header class="top">
+    <span class="wordmark">SYLIA.ADÈLE</span>
+    <nav class="top-nav">
+      <a href="mailto:sylia.adele.lakrib@gmail.com">CONTACT</a>
+      <button type="button" id="theme">THEME</button>
     </nav>
+  </header>
 
-    <p class="foot">© <span id="year"></span> Sylia Adèle Lakrib — Paris</p>
+  <main class="soon">
+    <!-- Glass "hello", same construction as the new site -->
+    <div class="hello" id="hello" aria-hidden="true">
+      <div class="hello-tilt" id="helloTilt">
+        <div class="hello-drift">
+          <div class="hello-refract"></div>
+
+          <svg class="hello-svg" viewBox="0 0 960 420" width="960" height="420">
+            <defs>
+              <linearGradient id="hGrad" x1="0.05" y1="0" x2="0.85" y2="1">
+                <stop offset="0%"   stop-color="#9fc9f2" />
+                <stop offset="30%"  stop-color="#5f9ade" />
+                <stop offset="55%"  stop-color="#8dbdee" />
+                <stop offset="78%"  stop-color="#4f88d6" />
+                <stop offset="100%" stop-color="#87b8ec" />
+                <animate attributeName="x1" values="0.05;0.5;0.05" dur="16s" repeatCount="indefinite" />
+                <animate attributeName="x2" values="0.85;1.3;0.85" dur="16s" repeatCount="indefinite" />
+              </linearGradient>
+
+              <clipPath id="helloClipCore" clipPathUnits="userSpaceOnUse">
+                <text class="hello-type" x="480" y="300" text-anchor="middle">hello</text>
+              </clipPath>
+
+              <filter id="hGlow" x="-25%" y="-35%" width="150%" height="170%">
+                <feGaussianBlur stdDeviation="24" />
+              </filter>
+
+              <filter id="hGlass" x="-25%" y="-32%" width="150%" height="176%"
+                      color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2"
+                              seed="4" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="12"
+                                   xChannelSelector="R" yChannelSelector="G" result="warp" />
+                <feComposite in="warp" in2="SourceAlpha" operator="in" result="tint" />
+                <feComponentTransfer in="tint" result="body">
+                  <feFuncA type="linear" slope="0.2" />
+                </feComponentTransfer>
+
+                <feMorphology in="SourceAlpha" operator="erode" radius="9" result="core" />
+                <feComposite in="SourceAlpha" in2="core" operator="out" result="edgeRaw" />
+                <feGaussianBlur in="edgeRaw" stdDeviation="4" result="edge" />
+
+                <feFlood flood-color="#eaf5ff" flood-opacity="0.42" result="contourCol" />
+                <feComposite in="contourCol" in2="edge" operator="in" result="contour" />
+
+                <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="bump" />
+                <feSpecularLighting in="bump" surfaceScale="8" specularConstant="1.05"
+                                    specularExponent="30" lighting-color="#ffffff" result="spec">
+                  <fePointLight x="280" y="0" z="260" />
+                </feSpecularLighting>
+                <feComposite in="spec" in2="edge" operator="in" result="specEdge" />
+
+                <feSpecularLighting in="bump" surfaceScale="7" specularConstant="0.6"
+                                    specularExponent="12" lighting-color="#cfe6ff" result="rim">
+                  <fePointLight x="820" y="440" z="220" />
+                </feSpecularLighting>
+                <feComposite in="rim" in2="edge" operator="in" result="rimEdge" />
+
+                <feComposite in="contour" in2="body" operator="over" result="s1" />
+                <feComposite in="specEdge" in2="s1" operator="arithmetic"
+                             k1="0" k2="1" k3="1" k4="0" result="s2" />
+                <feComposite in="rimEdge" in2="s2" operator="arithmetic"
+                             k1="0" k2="1" k3="1" k4="0" result="s3" />
+
+                <feDropShadow in="s3" dx="0" dy="14" stdDeviation="16"
+                              flood-color="#2a5c9c" flood-opacity="0.13" />
+              </filter>
+            </defs>
+
+            <text class="hello-type" x="480" y="300" text-anchor="middle"
+                  fill="#7fb3ec" opacity="0.16" filter="url(#hGlow)">hello</text>
+            <text class="hello-type" id="helloWord" x="480" y="300" text-anchor="middle"
+                  fill="url(#hGrad)" stroke="url(#hGrad)" stroke-width="10"
+                  stroke-linejoin="round" stroke-linecap="round" paint-order="stroke"
+                  filter="url(#hGlass)">hello</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="soon-inner">
+      <span class="soon-badge up" style="--i:0">
+        <span class="dot" aria-hidden="true"></span>
+        <span data-fr="SITE EN CONSTRUCTION">SITE UNDER CONSTRUCTION</span>
+      </span>
+
+      <h1 class="soon-name up" style="--i:1">Sylia Adèle Lakrib</h1>
+
+      <p class="soon-role mono up" style="--i:2" data-fr="DESIGNER CRÉATIVE · DESIGNER DE MARQUE · ILLUSTRATRICE">CREATIVE DESIGNER · BRAND DESIGNER · ILLUSTRATOR</p>
+
+      <p class="soon-msg up" style="--i:3" data-fr="Mon nouveau portfolio est en préparation. En attendant, n'hésitez pas à m'écrire — je réponds vite :)">My new portfolio is on its way. In the meantime, feel free to reach
+        out — I'll get back to you quickly :)</p>
+
+      <nav class="soon-links up" style="--i:4">
+        <a class="pill primary" href="mailto:sylia.adele.lakrib@gmail.com" data-fr="ÉCRIVEZ-MOI <span aria-hidden='true'>→</span>">CONTACT ME <span aria-hidden="true">→</span></a>
+        <a class="pill" href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener" data-fr="PORTFOLIO ACTUEL <span aria-hidden='true'>↗</span>">CURRENT PORTFOLIO <span aria-hidden="true">↗</span></a>
+        <a class="pill" href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LINKEDIN <span aria-hidden="true">↗</span></a>
+        <a class="pill" href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">INSTAGRAM <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
   </main>
 
+  <div class="status mono" aria-hidden="true">
+    <span id="clock">GMT+2 FR --:--</span>
+    <span>© <span id="year"></span> SYLIA ADÈLE LAKRIB</span>
+    <span class="globe">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="12" cy="12" r="9" />
+        <ellipse cx="12" cy="12" rx="4" ry="9" />
+        <path d="M3 12h18M4.5 7h15M4.5 17h15" />
+      </svg>
+    </span>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <svg viewBox="0 0 32 36" width="34" height="38">
+      <defs>
+        <linearGradient id="curGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8fc0f5" />
+          <stop offset="45%" stop-color="#4a8fe0" />
+          <stop offset="100%" stop-color="#2b62b8" />
+        </linearGradient>
+      </defs>
+      <path d="M3 2 L29 17 L17 20 L12 33 Z" fill="url(#curGrad)" stroke="rgba(255,255,255,.55)" stroke-width="1.2" stroke-linejoin="round" />
+    </svg>
+  </div>
+
+  <script src="test2/sky.js"></script>
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+    (function () {
+      const root = document.documentElement;
+
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      // Column grid with crosshairs
+      const grid = document.getElementById("grid");
+      [3.5, 34, 65.5, 96.5].forEach((left) => {
+        const line = document.createElement("div");
+        line.className = "gline";
+        line.style.left = left + "%";
+        [33, 68].forEach((top) => {
+          const plus = document.createElement("span");
+          plus.className = "plus";
+          plus.style.top = top + "%";
+          plus.textContent = "+";
+          line.appendChild(plus);
+        });
+        grid.appendChild(line);
+      });
+
+      // Theme
+      const themeBtn = document.getElementById("theme");
+      const setTheme = (t) => {
+        root.dataset.theme = t;
+        try { localStorage.setItem("theme", t); } catch (e) {}
+      };
+      let saved = null;
+      try { saved = localStorage.getItem("theme"); } catch (e) {}
+      setTheme(saved || "light");
+      themeBtn.addEventListener("click", () =>
+        setTheme(root.dataset.theme === "dark" ? "light" : "dark")
+      );
+
+      // Paris clock
+      const clock = document.getElementById("clock");
+      const tick = () => {
+        clock.textContent =
+          "GMT+2 FR " +
+          new Date().toLocaleTimeString("en-GB", {
+            timeZone: "Europe/Paris",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+      };
+      tick();
+      setInterval(tick, 10000);
+
+      // Glass "hello" — scale to the viewport, then reveal
+      const hello = document.getElementById("hello");
+      const helloWord = document.getElementById("helloWord");
+      const helloTilt = document.getElementById("helloTilt");
+
+      function sizeHello() {
+        let w = 960;
+        try {
+          const b = helloWord.getBBox();
+          if (b && b.width > 10) w = b.width + 20;
+        } catch (e) {}
+        hello.style.setProperty(
+          "--k",
+          Math.min(1.25, (window.innerWidth * 0.52) / w).toFixed(3)
+        );
+      }
+      sizeHello();
+      window.addEventListener("resize", sizeHello, { passive: true });
+
+      const reveal = () =>
+        requestAnimationFrame(() => {
+          sizeHello();
+          hello.classList.add("in");
+        });
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load('300px "Pacifico"').then(reveal).catch(reveal);
+      } else {
+        reveal();
+      }
+
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Cursor parallax on the wordmark + custom cursor
+      if (!calm && window.matchMedia("(pointer: fine)").matches) {
+        const cursor = document.getElementById("cursor");
+        document.body.classList.add("custom-cursor");
+
+        let tx = 0, ty = 0, cx = 0, cy = 0, running = false;
+        let px = 0, py = 0, frame = null;
+
+        const drawCursor = () => {
+          cursor.style.translate = `${px}px ${py}px`;
+          frame = null;
+        };
+
+        const paint = () => {
+          cx += (tx - cx) * 0.05;
+          cy += (ty - cy) * 0.05;
+          helloTilt.style.transform =
+            `translate3d(${(cx * 30).toFixed(2)}px, ${(cy * 16).toFixed(2)}px, 0)` +
+            ` rotateY(${(cx * 8).toFixed(2)}deg) rotateX(${(-cy * 5.5).toFixed(2)}deg)`;
+          if (Math.abs(tx - cx) < 0.001 && Math.abs(ty - cy) < 0.001) {
+            running = false;
+            return;
+          }
+          requestAnimationFrame(paint);
+        };
+
+        const run = () => {
+          if (running) return;
+          running = true;
+          requestAnimationFrame(paint);
+        };
+
+        window.addEventListener("mousemove", (e) => {
+          tx = (e.clientX / window.innerWidth) * 2 - 1;
+          ty = (e.clientY / window.innerHeight) * 2 - 1;
+          px = e.clientX;
+          py = e.clientY;
+          cursor.classList.add("on");
+          if (!frame) frame = requestAnimationFrame(drawCursor);
+          run();
+        }, { passive: true });
+
+        const rest = () => { tx = 0; ty = 0; run(); };
+        document.addEventListener("mouseleave", () => {
+          cursor.classList.remove("on");
+          rest();
+        });
+        window.addEventListener("blur", rest);
+      }
+
+      // EN / FR — follows whatever the visitor picked on the new site
+      const i18n = document.querySelectorAll("[data-fr]");
+      const en = new Map();
+      i18n.forEach((el) => en.set(el, el.innerHTML));
+      let lang = "en";
+      try { lang = localStorage.getItem("lang") || "en"; } catch (e) {}
+      if (lang === "fr") {
+        i18n.forEach((el) => (el.innerHTML = el.getAttribute("data-fr")));
+        root.lang = "fr";
+      }
+    })();
   </script>
 </body>
 </html>
