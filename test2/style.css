@@ -323,6 +323,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   overflow: visible;
 }
 
+/* the baked bitmap that replaces it on phones */
+.hello-raster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .hello-type {
   font-family: var(--script);
   font-size: 300px;
