@@ -3,252 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sylia Adèle Lakrib — Creative & Brand Designer</title>
-  <meta name="description" content="Portfolio of Sylia Adèle Lakrib — creative & brand designer. Brand identity, art direction and interface design that leaves a lasting impression." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <title>Sylia Adèle Lakrib</title>
+
+  <!-- The old /test prototype has been replaced by /test2. Anyone
+       arriving here from an old link is sent straight there. -->
+  <meta http-equiv="refresh" content="0; url=/test2/" />
+  <link rel="canonical" href="/test2/" />
+  <meta name="robots" content="noindex" />
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: #b9d8f2;
+      color: #000;
+      font-family: ui-monospace, "JetBrains Mono", Consolas, monospace;
+      font-size: .8rem;
+      letter-spacing: .1em;
+    }
+    a { color: inherit; }
+  </style>
 </head>
-<body class="loading">
-  <!-- Page-load intro / curtain -->
-  <div class="loader" id="loader">
-    <div class="loader-inner">
-      <span class="loader-name">Sylia <em>Adèle</em></span>
-      <span class="loader-bar"><span></span></span>
-    </div>
-  </div>
-
-  <!-- Animated background -->
-  <div class="mesh" aria-hidden="true"></div>
-  <div class="veil" aria-hidden="true"></div>
-
-  <!-- Blurred backdrop behind the open menu -->
-  <div class="nav-overlay" id="navOverlay" aria-hidden="true"></div>
-
-  <!-- Navigation — centered rounded panel that opens a dropdown menu -->
-  <header class="nav" id="nav">
-    <div class="nav-panel">
-      <div class="nav-bar">
-        <a href="#hero" class="logo">Sylia<span>Adèle</span></a>
-        <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="navMenu">
-          <span></span><span></span>
-        </button>
-      </div>
-      <nav class="nav-menu" id="navMenu">
-        <div class="nav-menu-inner">
-          <a href="#work" class="nav-menu-item" style="--i:0" data-fr="Projets <span class='arrow' aria-hidden='true'>&rarr;</span>">Work <span class="arrow" aria-hidden="true">→</span></a>
-          <a href="#services" class="nav-menu-item" style="--i:1" data-fr="Ce que je fais <span class='arrow' aria-hidden='true'>&rarr;</span>">What I do <span class="arrow" aria-hidden="true">→</span></a>
-          <a href="#about" class="nav-menu-item" style="--i:2" data-fr="À propos <span class='arrow' aria-hidden='true'>&rarr;</span>">About <span class="arrow" aria-hidden="true">→</span></a>
-          <div class="nav-menu-foot">
-            <a href="#contact" class="btn btn-primary" data-fr="Démarrer un projet">Start a project</a>
-          </div>
-        </div>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Hero -->
-  <section class="hero" id="hero">
-    <span class="hero-eyebrow reveal" style="--i:0" data-fr="<span class='dot'></span> Designer créative &amp; de marque"><span class="dot"></span> Creative &amp; Brand Designer</span>
-    <h1 class="hero-title reveal" style="--i:1" data-fr="Je crée des marques qui<br /><em>vont jusqu'au bout</em> — jamais à moitié.">I build brands that<br /><em>go all in</em> — never halfway.</h1>
-    <p class="hero-sub reveal" style="--i:2" data-fr="Identité de marque, direction artistique et design d'interfaces. Je crée des univers visuels forts, de ceux qu'on n'oublie pas.">Brand identity, art direction and interface design.
-      I craft bold visual worlds that people remember.</p>
-    <div class="hero-cta reveal" style="--i:3">
-      <a href="#work" class="btn btn-primary" data-fr="Voir mes projets">See selected work</a>
-      <a href="#contact" class="btn btn-ghost" data-fr="Démarrer un projet">Start a project</a>
-    </div>
-    <div class="hero-meta reveal" style="--i:4">
-      <div><strong>+30</strong><span data-fr="Projets réalisés">Projects delivered</span></div>
-      <div><strong>5 yrs</strong><span data-fr="D'expérience">Of experience</span></div>
-      <div><strong>100%</strong><span data-fr="Sur-mesure">Bespoke work</span></div>
-      <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
-        <button class="lang-opt" data-lang="en" type="button">EN</button>
-        <button class="lang-opt" data-lang="fr" type="button">FR</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Selected work -->
-  <section class="section" id="work">
-    <div class="section-head reveal">
-      <span class="tag" data-fr="01 — Projets">01 — Selected work</span>
-      <h2 data-fr="Des projets dont je suis <span class='gradient-text'>fière</span>">Projects I'm <span class="gradient-text">proud of</span></h2>
-      <p class="lead" data-fr="Quelques collaborations récentes. Cliquez sur un projet pour en savoir plus.">A few recent collaborations. Tap any project to take a closer look.</p>
-    </div>
-
-    <div class="work-list" id="workList">
-      <div class="work-item reveal" style="--i:0">
-        <button class="work-head" aria-expanded="false">
-          <span class="work-num">01</span>
-          <span class="work-title" data-fr="Identité de marque">Brand identity</span>
-          <span class="work-cat">Branding · Logo</span>
-          <span class="work-toggle" aria-hidden="true"></span>
-        </button>
-        <div class="work-panel">
-          <div class="work-panel-inner">
-            <div class="work-thumb thumb-a"></div>
-            <div class="work-desc">
-              <p data-fr="Une identité visuelle complète pour une marque émergente — système de logo, palette de couleurs, typographie et charte, pensés pour s'adapter à tous les supports.">A complete visual identity for an emerging brand — logo system,
-                color world, typography and guidelines, built to scale across every touchpoint.</p>
-              <div class="work-tags"><span>Branding</span><span>Logo</span><span data-fr="Charte">Guidelines</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="work-item reveal" style="--i:1">
-        <button class="work-head" aria-expanded="false">
-          <span class="work-num">02</span>
-          <span class="work-title" data-fr="Design d'application">App design</span>
-          <span class="work-cat">UI/UX · Mobile</span>
-          <span class="work-toggle" aria-hidden="true"></span>
-        </button>
-        <div class="work-panel">
-          <div class="work-panel-inner">
-            <div class="work-thumb thumb-b"></div>
-            <div class="work-desc">
-              <p data-fr="Une expérience mobile conçue de A à Z — des wireframes et parcours utilisateurs jusqu'à un prototype interactif soigné, prêt pour le développement.">A full mobile experience designed from the ground up — from wireframes
-                and user flows to a polished, interactive prototype ready for development.</p>
-              <div class="work-tags"><span>UI/UX</span><span>Mobile</span><span>Prototype</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="work-item reveal" style="--i:2">
-        <button class="work-head" aria-expanded="false">
-          <span class="work-num">03</span>
-          <span class="work-title" data-fr="Direction artistique">Art direction</span>
-          <span class="work-cat" data-fr="Campagne · Social">Campaign · Social</span>
-          <span class="work-toggle" aria-hidden="true"></span>
-        </button>
-        <div class="work-panel">
-          <div class="work-panel-inner">
-            <div class="work-thumb thumb-c"></div>
-            <div class="work-desc">
-              <p data-fr="Une campagne visuelle et un univers graphique pour les réseaux sociaux — un langage cohérent et percutant, pensé pour capter l'attention et marquer les esprits.">A visual campaign and graphic universe for social media — a consistent,
-                eye-catching language designed to stop the scroll and build recognition.</p>
-              <div class="work-tags"><span data-fr="Direction artistique">Art direction</span><span>Social</span><span data-fr="Campagne">Campaign</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="work-item reveal" style="--i:3">
-        <button class="work-head" aria-expanded="false">
-          <span class="work-num">04</span>
-          <span class="work-title" data-fr="Site vitrine">Showcase website</span>
-          <span class="work-cat">Web · E-commerce</span>
-          <span class="work-toggle" aria-hidden="true"></span>
-        </button>
-        <div class="work-panel">
-          <div class="work-panel-inner">
-            <div class="work-thumb thumb-d"></div>
-            <div class="work-desc">
-              <p data-fr="Design web et maquette responsive pour une boutique en ligne — une mise en page claire et orientée conversion, qui met les produits en avant.">Web design and a responsive mockup for an online store — a clean,
-                conversion-focused layout that puts the products front and center.</p>
-              <div class="work-tags"><span>Web</span><span>E-commerce</span><span>Responsive</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- What I do -->
-  <section class="section" id="services">
-    <div class="section-head reveal">
-      <span class="tag" data-fr="02 — Ce que je fais">02 — What I do</span>
-      <h2 data-fr="Services &amp; <span class='gradient-text'>expertise</span>">Services &amp; <span class="gradient-text">expertise</span></h2>
-    </div>
-    <div class="services">
-      <div class="service-card reveal" style="--i:0">
-        <h3>Branding</h3>
-        <ul>
-          <li data-fr="Identité de marque">Brand identity</li>
-          <li data-fr="Création de logo">Logo design</li>
-          <li data-fr="Chartes graphiques">Visual guidelines</li>
-          <li data-fr="Print &amp; édition">Print &amp; editorial</li>
-        </ul>
-      </div>
-      <div class="service-card reveal" style="--i:1">
-        <h3 data-fr="Direction artistique">Art direction</h3>
-        <ul>
-          <li>Moodboards</li>
-          <li data-fr="Univers visuel">Visual world</li>
-          <li data-fr="Campagnes">Campaigns</li>
-          <li data-fr="Création de contenu">Content creation</li>
-        </ul>
-      </div>
-      <div class="service-card reveal" style="--i:2">
-        <h3>UI / UX</h3>
-        <ul>
-          <li>Wireframing</li>
-          <li data-fr="Prototypage">Prototyping</li>
-          <li data-fr="Design systems">Design systems</li>
-          <li data-fr="Web &amp; mobile">Web &amp; mobile</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- Clients marquee -->
-  <div class="marquee-wrap reveal">
-    <p class="marquee-label" data-fr="Ils m'ont fait confiance">Trusted by brands &amp; creators</p>
-    <div class="marquee" id="marquee">
-      <span>Studio Nord</span><span>Maison Lumi</span><span>Atelier Vrai</span>
-      <span>Brava</span><span>Côté Sud</span><span>Helia</span><span>Nova Press</span>
-      <!-- duplicated for seamless loop -->
-      <span>Studio Nord</span><span>Maison Lumi</span><span>Atelier Vrai</span>
-      <span>Brava</span><span>Côté Sud</span><span>Helia</span><span>Nova Press</span>
-    </div>
-  </div>
-
-  <!-- About -->
-  <section class="section" id="about">
-    <div class="section-head reveal">
-      <span class="tag" data-fr="03 — À propos">03 — About</span>
-      <h2 data-fr="Bonjour, moi c'est <span class='gradient-text'>Sylia Adèle</span>">Hi, I'm <span class="gradient-text">Sylia Adèle</span></h2>
-    </div>
-    <div class="about">
-      <div class="about-photo reveal" style="--i:0">
-        <!-- Replace with your photo: drop it in the folder and swap this block for an <img> -->
-        <div class="photo-placeholder">SA</div>
-      </div>
-      <div class="about-text reveal" style="--i:1">
-        <p data-fr="Designer créative &amp; de marque basée à Paris, passionnée par la création visuelle, j'aide les marques et les créateurs à transformer leurs idées en expériences mémorables.">I'm a creative &amp; brand designer based in Paris, passionate about visual
-          creation. I help brands and creators turn their ideas into memorable experiences.</p>
-        <p data-fr="De l'identité visuelle au design d'interface, j'aime mêler couleur, mouvement et sens pour créer des projets qui se démarquent vraiment. Des petits détails, un grand impact — et jamais de demi-mesure.">From visual identity to interface design, I love blending color, motion and
-          meaning to craft projects that genuinely stand out. Small details, big impact —
-          and no half measures.</p>
-        <div class="about-values">
-          <span data-fr="À fond, toujours">All in, always</span>
-          <span data-fr="Audacieuse par nature">Bold by default</span>
-          <span data-fr="Obsédée du détail">Detail-obsessed</span>
-          <span data-fr="Chaleureuse &amp; à l'écoute">Warm &amp; collaborative</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact -->
-  <section class="section contact" id="contact">
-    <span class="tag reveal" style="--i:0">04 — Contact</span>
-    <h2 class="reveal" style="--i:1" data-fr="Créons ensemble quelque chose<br /><span class='gradient-text'>d'inoubliable</span>">Let's build something<br /><span class="gradient-text">unforgettable</span></h2>
-    <p class="lead reveal" style="--i:2" data-fr="Un projet en tête ? Écrivez-moi — je réponds vite.">Got a project in mind? Drop me a line — I reply quickly.</p>
-    <a class="contact-email reveal" style="--i:3" href="mailto:sylia.adele.lakrib@gmail.com">sylia.adele.lakrib@gmail.com</a>
-    <div class="socials reveal" style="--i:4">
-      <a href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener">Behance / Portfolio</a>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <p>© <span id="year"></span> <span data-fr="Sylia Adèle Lakrib — Conçu avec ❤️ à Paris">Sylia Adèle Lakrib — Designed with ❤️ in Paris</span></p>
-  </footer>
-
-  <script src="script.js"></script>
+<body>
+  <p>REDIRECTION → <a href="/test2/">/test2/</a></p>
+  <script>location.replace("/test2/");</script>
 </body>
 </html>
