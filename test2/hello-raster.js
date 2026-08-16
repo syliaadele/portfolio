@@ -27,7 +27,7 @@
 
   /* Bump the version when the artwork changes, or phones will keep
      serving the bitmap they baked from the old one. */
-  const KEY = "helloPng:v1";
+  const KEY = "helloPng:v2"; /* v2: thicker strokes */
   const W = 960;
   const H = 420;
   const SCALE = Math.min(2, window.devicePixelRatio || 1);
@@ -67,10 +67,18 @@
     const b64 = btoa(bin);
     const fmt = url.includes(".woff2") ? "woff2" : "woff";
 
+    /* Anything the page's stylesheet contributes has to be restated
+       here — a serialised SVG carries none of it. stroke-width in
+       particular is set by a media query on phones, so it is read back
+       from the live element instead of being hard-coded. */
+    const word = svg.querySelector("#helloWord");
+    const stroke = word ? getComputedStyle(word).strokeWidth : "10px";
+
     return (
       `@font-face{font-family:'Pacifico';font-style:normal;font-weight:400;` +
       `src:url(data:font/${fmt};base64,${b64}) format('${fmt}')}` +
-      `.hello-type{font-family:'Pacifico',cursive;font-size:300px}`
+      `.hello-type{font-family:'Pacifico',cursive;font-size:300px}` +
+      `#helloWord{stroke-width:${stroke}}`
     );
   }
 

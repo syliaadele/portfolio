@@ -697,7 +697,11 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
 @media (max-width: 900px) {
   .hero-cols { grid-template-columns: 1fr; gap: 1.25rem; }
   .bio { max-width: none; }
-  .hello { top: 42%; }
+  /* Phones only: the word sits right at the top, above the discipline
+     heading, and its strokes are thicker. CSS overrides the SVG
+     presentation attribute, so desktop keeps stroke-width="10". */
+  .hello { top: 22%; }
+  #helloWord { stroke-width: 18; }
   /* backdrop-filter over a large area is the expensive part — drop the
      refraction pass on small screens and keep the lit glass */
   .hello-refract { display: none; }
