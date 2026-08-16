@@ -96,6 +96,13 @@
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+  /* Phones: big blurred layers are the expensive part of this scene.
+     Cap the blur radius and drop the largest foreground clouds, which
+     cover the most pixels for the least compositional value. */
+  const LITE = window.innerWidth < 900;
+  const MAX_BLUR_LITE = 6;
+  const MAX_SCALE_LITE = 2.4;
+
   /* ---------- build ---------- */
 
   const ns = "http://www.w3.org/2000/svg";
@@ -154,14 +161,18 @@
     const el = document.createElement("div");
     el.className = "sky-layer";
 
-    const clouds = def.clouds.map((c) => {
+    const list = LITE
+      ? def.clouds.filter((c) => c.s <= MAX_SCALE_LITE)
+      : def.clouds;
+    const blur = LITE ? Math.min(def.blur, MAX_BLUR_LITE) : def.blur;
+
+    const clouds = list.map((c) => {
       const wrap = document.createElement("div");
       /* `night: false` clouds step aside under the dark theme */
       wrap.className = c.night === false ? "cloud cloud--day" : "cloud";
       wrap.style.cssText =
         `left:${c.x}%;top:${c.y}%;` +
         `--w:${Math.round(300 * c.s)}px;` +
-        `filter:blur(${def.blur}px);` +
         `opacity:${def.opacity};`;
 
       const inner = document.createElement("div");
@@ -174,6 +185,12 @@
 
       const svg = document.createElementNS(ns, "svg");
       svg.setAttribute("viewBox", "0 0 320 140");
+      /* The blur lives on the innermost element on purpose. With it on
+         the wrapper, the drift animation on .cloud-i was changing the
+         filter's INPUT every frame, forcing a re-blur 60 times a second
+         per cloud. Here the blurred result is rasterised once and the
+         ancestors just move it around. */
+      svg.style.filter = `blur(${blur}px)`;
       const use = document.createElementNS(ns, "use");
       use.setAttribute("href", `#sky-cl-${c.shape}`);
       svg.appendChild(use);

@@ -92,6 +92,30 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* --- top bar ---------------------------------------------------- */
 
+/* --- burger (hidden above the mobile breakpoint) ------------------ */
+
+.burger {
+  display: none;
+  position: relative;
+  width: 34px;
+  height: 22px;
+  padding: 0;
+  flex: 0 0 auto;
+}
+.burger span {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform .4s var(--ease), opacity .25s var(--ease);
+}
+.burger span:nth-child(1) { top: 7px; }
+.burger span:nth-child(2) { bottom: 7px; }
+
+.menu-open .burger span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.menu-open .burger span:nth-child(2) { transform: translateY(-6.5px) rotate(-45deg); }
+
 .top {
   position: relative;
   z-index: 5;
@@ -243,10 +267,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hello {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 39%;
   width: 960px;
   height: 420px;
-  margin: -210px 0 0 -480px;
+  /* Centred with `translate` rather than negative margins: margins are
+     tied to the fixed 960x420 box, this stays true whatever the size,
+     and it composes cleanly with the scale below. */
+  translate: -50% -50%;
   z-index: 2;
   pointer-events: none;
   opacity: 0;
@@ -661,10 +688,15 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
 @media (max-width: 900px) {
   .hero-cols { grid-template-columns: 1fr; gap: 1.25rem; }
   .bio { max-width: none; }
-  .hello { top: 50%; }
+  .hello { top: 42%; }
   /* backdrop-filter over a large area is the expensive part — drop the
      refraction pass on small screens and keep the lit glass */
   .hello-refract { display: none; }
+  /* A transform on a filtered element makes phones re-rasterise it
+     every frame, so the idle float stops here. */
+  .hello-drift { animation: none; }
+  /* fewer compositor layers = less memory pressure on mobile GPUs */
+  .cloud, .cloud-i, .sky-layer { will-change: auto; }
   .top-nav { gap: 1rem; font-size: .7rem; }
   .status { font-size: .64rem; }
   #coords { display: none; }
@@ -683,6 +715,85 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   .cursor { display: none; }
 }
 
+/* --- phones ------------------------------------------------------ */
+/* Five nav items never fit beside the wordmark, so below this width
+   they collapse behind a burger and drop down as a glass panel. */
+@media (max-width: 640px) {
+  .top { padding: .9rem var(--pad); }
+  .wordmark { font-size: .78rem; }
+  .burger { display: block; }
+
+  .top-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: .35rem var(--pad) 1rem;
+    background: color-mix(in srgb, var(--sky-1) 72%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    font-size: .78rem;
+    opacity: 0;
+    translate: 0 -8px;
+    pointer-events: none;
+    transition: opacity .3s var(--ease), translate .35s var(--ease);
+  }
+  .menu-open .top-nav {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: auto;
+  }
+
+  .top-nav > * {
+    padding: .85rem .2rem;
+    border-top: 1px solid var(--line);
+    text-align: left;
+  }
+  /* the sliding oval makes no sense on stacked full-width rows */
+  .top-nav a::before, .top-nav button::before { content: none; }
+  .top-nav a:hover, .top-nav button:hover { transform: none; }
+
+  .hero { min-height: calc(100svh - 5rem); }
+  .discipline { font-size: 1.5rem; }
+
+  .block { padding: clamp(2.5rem, 9vw, 4rem) var(--pad); }
+  .cols { padding-top: 1.75rem; }
+  .about { padding-top: 1.75rem; }
+
+  .foot-mail { width: 100%; justify-content: space-between; }
+  .foot-links { gap: 1rem; }
+
+  /* No full-height finale on a phone — it left a screen of dead space
+     under the links. The section is now only as tall as its content. */
+  .foot--big { min-height: 0; padding-top: clamp(3rem, 12vw, 4.5rem); }
+  .foot { padding-bottom: 2rem; }
+  .foot--big .colophon { margin-top: 2.5rem; padding-top: 1.5rem; }
+  .foot-title { margin-bottom: 1.75rem; }
+
+  /* The fixed status bar has no background, so on a phone it just
+     printed the clock on top of whatever was scrolling past. There's
+     no room for it here and the colophon already carries the credit. */
+  .status { display: none; }
+
+  /* tighter menu rows — the panel was eating most of the screen */
+  .top-nav { padding: .25rem var(--pad) .75rem; }
+  .top-nav > * { padding: .7rem .2rem; }
+}
+
+/* Very narrow: the display sizes need their floors lowered or the
+   longest words run past the edge. */
+@media (max-width: 400px) {
+  .mega { font-size: 9.5vw; }
+  .foot-title { font-size: 9.2vw; }
+  .project-title { font-size: 8.5vw; }
+  .work-title { font-size: 8.5vw; }
+  .row-title { font-size: 1.3rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
@@ -692,4 +803,31 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   }
   .rv { opacity: 1; transform: none; }
   .hello { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------
+   Touch devices keep :hover stuck after a tap, so every hover effect
+   is gated behind an actual hover capability. Same approach as the
+   reference site, which pairs `@media (hover: hover)` with each one.
+   --------------------------------------------------------------- */
+
+@media (hover: none) {
+  .top-nav a:hover,
+  .top-nav button:hover { transform: none; }
+  .top-nav a:hover::before,
+  .top-nav button:hover::before { opacity: 0; }
+
+  .row-btn:hover { background: none; padding-left: .6rem; }
+  .col ul li:hover { color: var(--ink-2); padding-left: 0; }
+  .links a:hover { color: var(--ink-2); }
+  .mail:hover { border-color: var(--line); }
+  .work-all:hover { transform: none; border-color: var(--line); }
+
+  .foot-mail:hover { transform: none; box-shadow: 0 10px 30px -12px var(--pill-shadow); }
+  .foot-mail:hover .foot-mail-arrow { transform: none; }
+
+  .card:hover .card-media img { transform: none; }
+  .back:hover { transform: none; }
+  .project-nav a:hover { color: var(--ink-2); }
+  .pill:hover { transform: none; }
 }

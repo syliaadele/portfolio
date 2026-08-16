@@ -110,11 +110,41 @@ function sizeHello() {
   } catch (e) {
     /* getBBox throws if the SVG isn't rendered yet — keep the fallback */
   }
-  const k = Math.min(HELLO.maxScale, (window.innerWidth * HELLO.fill) / wordW);
+  /* On a phone, half the viewport leaves the word too small to register
+     against the headline, so it takes up a much bigger share. */
+  const fill = window.innerWidth < 700 ? 0.86 : HELLO.fill;
+  const k = Math.min(HELLO.maxScale, (window.innerWidth * fill) / wordW);
   hello.style.setProperty("--k", k.toFixed(3));
 }
 sizeHello();
 window.addEventListener("resize", sizeHello, { passive: true });
+
+/* PHONE PERFORMANCE.
+   The glass filter is 24 primitives — two lighting passes, a
+   morphology, a turbulence and a displacement — and the two SMIL
+   <animate> tags on its gradient make the browser re-run all of it
+   every single frame. Desktop GPUs shrug; phones do not.
+   Below 900px the word keeps its shape and translucency but is drawn
+   with plain fill and stroke instead, which costs essentially nothing. */
+function liteHello() {
+  if (window.innerWidth >= 900 && window.matchMedia("(pointer: fine)").matches) {
+    return false;
+  }
+  document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
+  if (helloWord) {
+    helloWord.removeAttribute("filter");
+    helloWord.setAttribute("fill", "rgba(255, 255, 255, .26)");
+    helloWord.setAttribute("stroke", "rgba(255, 255, 255, .8)");
+    helloWord.setAttribute("stroke-width", "3");
+  }
+  /* the halo behind it is a full-size Gaussian blur of its own */
+  document.querySelectorAll('.hello-svg text[filter="url(#hGlow)"]').forEach(
+    (t) => t.remove()
+  );
+  document.querySelector(".hello-refract")?.remove();
+  return true;
+}
+const helloIsLite = liteHello();
 
 // Hold the reveal until the script font is ready — the filter would
 // otherwise light a fallback serif for a frame, and the measurement
@@ -195,6 +225,8 @@ if (!calmMotion.matches) {
   const warpMap = document.getElementById("hWarpMap");
   if (!svg || !warpGroup || !rippleImg || !warpMap) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  /* another whole-filter recompute per frame — desktop pointers only */
+  if (helloIsLite || !window.matchMedia("(pointer: fine)").matches) return;
 
   const VIEW = { w: 960, h: 420 }; // artboard units
   const R = {
