@@ -1,0 +1,488 @@
+/* ---------------------------------------------------------------
+   Sylia Adèle Lakrib — /test2
+   Blue-sky canvas, light streaks, glossy script "hello",
+   oversized grotesque headline, mono UI.
+   --------------------------------------------------------------- */
+
+:root {
+  --sky-1: #b9d8f2;
+  --sky-2: #cfe4f7;
+  --sky-3: #a9cdec;
+  --warm: 255, 246, 224;
+
+  --ink: #000;
+  --ink-2: rgba(0, 0, 0, .62);
+  --ink-3: rgba(0, 0, 0, .34);
+  --line: rgba(0, 0, 0, .13);
+  --panel: rgba(255, 255, 255, .28);
+  --pill: rgba(255, 255, 255, .15);      /* nav hover fill */
+  --pill-line: rgba(0, 0, 0, .18);
+  --pill-shadow: rgba(18, 64, 158, .22); /* saturated blue cast under the pill */
+
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --script: "Pacifico", cursive;
+
+  --pad: clamp(1.15rem, 3.4vw, 3.25rem);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+:root[data-theme="dark"] {
+  --sky-1: #0e2136;
+  --sky-2: #14304d;
+  --sky-3: #0a1929;
+  --warm: 120, 165, 225;
+
+  --ink: #fff;
+  --ink-2: rgba(255, 255, 255, .66);
+  --ink-3: rgba(255, 255, 255, .36);
+  --line: rgba(255, 255, 255, .14);
+  --panel: rgba(255, 255, 255, .06);
+  --pill: rgba(255, 255, 255, .15);
+  --pill-line: rgba(255, 255, 255, .26);
+  --pill-shadow: rgba(10, 44, 120, .38);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--sky-1);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, p, ul { margin: 0; }
+ul { list-style: none; padding: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+.mono {
+  font-family: var(--mono);
+  font-size: .78rem;
+  letter-spacing: .02em;
+  line-height: 1.5;
+}
+
+.dim { color: var(--ink-3); }
+.br { opacity: .45; }
+
+::selection { background: #c0fe04; color: #000; }
+
+/* Sky background lives in sky.css / sky.js */
+
+/* --- column grid ------------------------------------------------ */
+
+.grid { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.gline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.plus {
+  position: absolute;
+  left: 50%;
+  translate: -50% -50%;
+  font-family: var(--mono);
+  font-size: .8rem;
+  line-height: 1;
+  color: var(--line);
+}
+
+/* --- top bar ---------------------------------------------------- */
+
+.top {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.15rem var(--pad);
+}
+
+.wordmark {
+  font-family: var(--mono);
+  font-size: .84rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.1rem, 3.6vw, 3.6rem);
+  font-family: var(--mono);
+  font-size: .78rem;
+  letter-spacing: .04em;
+}
+/* Hover draws a thin oval around the label. It lives on a pseudo-element
+   with negative insets, so nothing in the bar shifts when it appears. */
+.top-nav a,
+.top-nav button {
+  position: relative;
+  /* own stacking context, so the filled pill can sit behind the label */
+  isolation: isolate;
+  transition: opacity .25s, transform .4s var(--ease);
+}
+
+/* the label lifts a couple of px, carrying the oval with it */
+.top-nav a:hover,
+.top-nav button:hover,
+.top-nav a:focus-visible,
+.top-nav button:focus-visible {
+  transform: translateY(-2px);
+}
+
+.top-nav a::before,
+.top-nav button::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -.55em -1.05em;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  opacity: 0;
+  transform: scale(.86);
+  box-shadow: 0 0 0 rgba(20, 45, 80, 0);
+  transition:
+    opacity .3s var(--ease),
+    transform .45s var(--ease),
+    background .3s var(--ease),
+    box-shadow .4s var(--ease);
+  pointer-events: none;
+}
+
+.top-nav a:hover::before,
+.top-nav button:hover::before,
+.top-nav a:focus-visible::before,
+.top-nav button:focus-visible::before {
+  opacity: 1;
+  transform: scale(1);
+  border-color: var(--pill-line);
+  /* light frosted fill, so the pill reads brighter than the sky */
+  background: var(--pill);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  /* soft cast underneath, so the lift reads as height */
+  box-shadow: 0 5px 14px -4px var(--pill-shadow);
+}
+
+/* --- hero ------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100svh - 4.5rem);
+  padding: clamp(1.5rem, 4vh, 3rem) var(--pad) clamp(4rem, 9vh, 6rem);
+}
+
+.hero-cols {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.15fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+
+.discipline {
+  font-size: clamp(1.4rem, 2.5vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+}
+
+.statement { color: var(--ink); }
+.bio { color: var(--ink); max-width: 46ch; }
+
+.mega {
+  position: relative;
+  z-index: 3;
+  font-size: min(75px, 11vw);
+  font-weight: 800;
+  line-height: .93;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+}
+
+/* --- glossy script "hello" -------------------------------------- */
+
+/* Authored at a fixed 960x420 so the SVG filter and the clip-path share
+   one coordinate space; --k (set in script.js from the word's measured
+   width) scales it to span ~50% of the viewport. Centring is done with
+   margins so `transform` stays free for the scale. */
+.hello {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 960px;
+  height: 420px;
+  margin: -210px 0 0 -480px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(var(--k, 1));
+  transform-origin: 50% 50%;
+  perspective: 1600px;
+}
+
+.hello.in { animation: helloIn 1.8s var(--ease) forwards; }
+
+/* JS writes the cursor parallax + perspective shift here */
+.hello-tilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Idle float, independent of the cursor */
+.hello-drift {
+  position: absolute;
+  inset: 0;
+  animation: helloDrift 19s ease-in-out infinite;
+}
+
+/* Real refraction of the sky behind, clipped to the letterforms.
+   Low blur on purpose — clear glass distorts, frosted glass fogs. */
+.hello-refract {
+  position: absolute;
+  inset: 0;
+  clip-path: url(#helloClipCore);
+  -webkit-backdrop-filter: blur(3px) saturate(1.4) brightness(1.03);
+  backdrop-filter: blur(3px) saturate(1.4) brightness(1.03);
+}
+
+.hello-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hello-type {
+  font-family: var(--script);
+  font-size: 300px;
+}
+
+@keyframes helloIn {
+  0%   { opacity: 0; scale: .88; }
+  60%  { opacity: 1; }
+  100% { opacity: 1; scale: 1; }
+}
+
+/* A few degrees of drift at rest — never more */
+@keyframes helloDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2.6deg); }
+  50%      { transform: translate3d(0, -24px, 0) rotate(-0.6deg); }
+}
+
+/* --- status bar ------------------------------------------------- */
+
+.status {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .85rem var(--pad);
+  font-size: .72rem;
+  letter-spacing: .05em;
+  pointer-events: none;
+}
+.globe { display: flex; opacity: .7; }
+
+/* --- content blocks --------------------------------------------- */
+
+main { position: relative; z-index: 2; }
+
+.block {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(3.5rem, 9vw, 7rem) var(--pad);
+}
+
+.block-head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: .8rem;
+  border-bottom: 1px solid var(--line);
+  letter-spacing: .12em;
+}
+
+/* work list */
+.row { border-bottom: 1px solid var(--line); }
+
+.row-btn {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 10rem 6rem 2rem;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.4rem .6rem;
+  text-align: left;
+  transition: background .3s var(--ease), padding-left .3s var(--ease);
+}
+.row-btn:hover { background: var(--panel); padding-left: 1.2rem; }
+
+.row-i, .row-cat, .row-year { color: var(--ink-2); letter-spacing: .08em; }
+
+.row-title {
+  font-size: clamp(1.5rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+}
+
+.row-mark {
+  font-size: 1.15rem;
+  color: var(--ink-2);
+  justify-self: end;
+  transition: transform .4s var(--ease);
+}
+.row.open .row-mark { transform: rotate(45deg); }
+
+.row-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease); }
+.row.open .row-panel { grid-template-rows: 1fr; }
+.row-panel-in { overflow: hidden; }
+.row-panel-in > * {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .4s var(--ease) .08s, transform .4s var(--ease) .08s;
+}
+.row.open .row-panel-in > * { opacity: 1; transform: none; }
+.row-panel-in p { max-width: 62ch; margin: 0 0 1.1rem; padding: 0 .6rem; color: var(--ink-2); }
+.row-panel-in .chips { padding: 0 .6rem 1.7rem; }
+
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chips li {
+  padding: .3rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  font-size: .68rem;
+  letter-spacing: .08em;
+  color: var(--ink-2);
+}
+
+/* expertise */
+.cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(2rem, 5vw, 4rem);
+  padding-top: 2.5rem;
+}
+.col h3 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 1rem; }
+.col ul li {
+  padding: .55rem 0;
+  border-top: 1px solid var(--line);
+  font-size: .95rem;
+  color: var(--ink-2);
+  transition: color .25s, padding-left .25s var(--ease);
+}
+.col ul li:hover { color: var(--ink); padding-left: .4rem; }
+
+/* about */
+.about { max-width: 64ch; padding-top: 2.5rem; }
+.about .big {
+  font-size: clamp(1.4rem, 2.9vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.18;
+  margin-bottom: 1.3rem;
+}
+.about p:not(.big) { color: var(--ink-2); }
+.chips.wide { margin-top: 2rem; }
+
+/* --- footer ----------------------------------------------------- */
+
+.foot {
+  position: relative;
+  z-index: 2;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(4rem, 10vw, 8rem) var(--pad) 5.5rem;
+  border-top: 1px solid var(--line);
+}
+.mega.small { font-size: clamp(1.9rem, 6vw, 5.4rem); }
+
+.mail {
+  display: inline-block;
+  margin-top: 2rem;
+  font-size: .85rem;
+  letter-spacing: .06em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 3px;
+  transition: border-color .25s;
+}
+.mail:hover { border-color: var(--ink); }
+
+.links { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2.5rem; letter-spacing: .06em; }
+.links a { color: var(--ink-2); transition: color .25s; }
+.links a:hover { color: var(--ink); }
+.colophon { margin-top: 2.5rem; letter-spacing: .06em; }
+
+/* --- custom cursor ---------------------------------------------- */
+
+.cursor {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s, scale .2s var(--ease);
+  filter: drop-shadow(0 4px 8px rgba(30, 70, 140, .35));
+}
+.cursor.on { opacity: 1; }
+.cursor.tap { scale: .82; }
+body.custom-cursor, body.custom-cursor * { cursor: none; }
+
+/* --- reveal ----------------------------------------------------- */
+
+.rv { opacity: 0; transform: translateY(18px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.rv.in { opacity: 1; transform: none; }
+
+/* --- responsive ------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hero-cols { grid-template-columns: 1fr; gap: 1.25rem; }
+  .bio { max-width: none; }
+  .hello { top: 50%; }
+  /* backdrop-filter over a large area is the expensive part — drop the
+     refraction pass on small screens and keep the lit glass */
+  .hello-refract { display: none; }
+  .top-nav { gap: 1rem; font-size: .7rem; }
+  .status { font-size: .64rem; }
+  #coords { display: none; }
+
+  .row-btn {
+    grid-template-columns: 2.5rem minmax(0, 1fr) 1.5rem;
+    grid-template-areas: "i title mark" ". meta .";
+    row-gap: .35rem;
+    padding: 1.1rem .4rem;
+  }
+  .row-i { grid-area: i; align-self: start; padding-top: .45rem; }
+  .row-title { grid-area: title; }
+  .row-mark { grid-area: mark; align-self: start; }
+  .row-cat { grid-area: meta; }
+  .row-year { display: none; }
+  .cursor { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .rv { opacity: 1; transform: none; }
+  .hello { opacity: 1; }
+}

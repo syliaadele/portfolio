@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sylia Adèle Lakrib — Creative &amp; Brand Designer</title>
+  <meta name="description" content="Portfolio of Sylia Adèle Lakrib — creative & brand designer. Brand identity, art direction and interface design." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Pacifico&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="sky.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Interactive sky background (built by sky.js) -->
+  <div class="sky" id="sky" aria-hidden="true"></div>
+
+  <!-- Column grid with crosshairs -->
+  <div class="grid" id="grid" aria-hidden="true"></div>
+
+  <!-- Top bar -->
+  <header class="top">
+    <a href="#top" class="wordmark">SYLIA.DESIGN</a>
+    <nav class="top-nav">
+      <a href="#work" data-fr="PROJETS">WORK</a>
+      <a href="#contact">CONTACT</a>
+      <button type="button" id="theme">THEME</button>
+      <button type="button" id="lang">LANG<span class="br">[</span><span id="langVal">EN</span><span class="br">]</span></button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-cols">
+        <h2 class="discipline" data-fr="Marque &amp;<br />Direction artistique">Brand &amp;<br />Art Direction</h2>
+        <p class="mono statement" data-fr="Penser la marque.<br />Créer avec soin.">Thinking in brands.<br />Designing with care.</p>
+        <p class="mono bio" data-fr="Je suis Sylia Adèle Lakrib, designer créative &amp; de marque à Paris. Identité, direction artistique et design d'interfaces. En dehors des projets clients, je dessine des systèmes visuels qui tiennent dans le temps.">I'm Sylia Adèle Lakrib, creative &amp; brand designer in Paris. Identity,
+          art direction and interface design. Outside client work, I build visual
+          systems made to last.</p>
+      </div>
+
+      <!-- "Hello" as a glass tube wordmark.
+           The letterform IS the geometry: a connected script face, kept
+           at its own weight so the counters in e / l / l / o stay open.
+           All the 3D comes from lighting a gently blurred copy of that
+           exact alpha — nothing dilates or reshapes the letters. -->
+      <div class="hello" id="hello" aria-hidden="true">
+        <div class="hello-tilt" id="helloTilt">
+          <div class="hello-drift">
+            <!-- Genuine refraction: blurs the live sky behind the word,
+                 clipped to the exact letterforms -->
+            <div class="hello-refract"></div>
+
+            <svg class="hello-svg" viewBox="0 0 960 420" width="960" height="420">
+              <defs>
+                <!-- A tint, not a paint job — narrow range, no white stops,
+                     so nothing reads as pearlescent -->
+                <linearGradient id="hGrad" x1="0.05" y1="0" x2="0.85" y2="1">
+                  <stop offset="0%"   stop-color="#9fc9f2" />
+                  <stop offset="30%"  stop-color="#5f9ade" />
+                  <stop offset="55%"  stop-color="#8dbdee" />
+                  <stop offset="78%"  stop-color="#4f88d6" />
+                  <stop offset="100%" stop-color="#87b8ec" />
+                  <animate attributeName="x1" values="0.05;0.5;0.05" dur="16s" repeatCount="indefinite" />
+                  <animate attributeName="x2" values="0.85;1.3;0.85" dur="16s" repeatCount="indefinite" />
+                </linearGradient>
+
+                <clipPath id="helloClipCore" clipPathUnits="userSpaceOnUse">
+                  <text class="hello-type" x="480" y="300" text-anchor="middle">hello</text>
+                </clipPath>
+
+                <filter id="hGlow" x="-25%" y="-35%" width="150%" height="170%">
+                  <feGaussianBlur stdDeviation="24" />
+                </filter>
+
+                <!-- LIQUID GLASS WARP.
+                     #hRipple is a pre-baked displacement field: a disc whose
+                     R/G channels encode an (x,y) offset — compression at the
+                     centre, expansion in a ring around it, fading to neutral
+                     grey at the rim. script.js moves that disc to the cursor
+                     and eases its strength, so the deformation is local,
+                     follows the pointer, and springs back on exit. -->
+                <filter id="hWarp" x="-30%" y="-35%" width="160%" height="180%"
+                        color-interpolation-filters="sRGB">
+                  <!-- rgb(128,128,·) means "no displacement" everywhere the
+                       ripple disc doesn't cover -->
+                  <feFlood flood-color="rgb(128,128,128)" result="neutral" />
+                  <feImage id="hRipple" x="-9999" y="-9999" width="380" height="380"
+                           result="ripple" preserveAspectRatio="none" />
+                  <feComposite in="ripple" in2="neutral" operator="over" result="cmap" />
+                  <feDisplacementMap id="hWarpMap" in="SourceGraphic" in2="cmap"
+                                     scale="0" xChannelSelector="R" yChannelSelector="G" />
+                </filter>
+
+                <!-- CLEAR GLASS.
+                     No diffuse lighting and no full-surface specular — those
+                     are what produced an opaque, pearlescent skin. The body
+                     is a barely-there blue tint; the form is revealed almost
+                     entirely by a thin band of light around the outline. -->
+                <filter id="hGlass" x="-25%" y="-32%" width="150%" height="176%"
+                        color-interpolation-filters="sRGB">
+                  <!-- INTERIOR — tinted, refracted, and mostly clear -->
+                  <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2"
+                                seed="4" result="noise" />
+                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="12"
+                                     xChannelSelector="R" yChannelSelector="G" result="warp" />
+                  <feComposite in="warp" in2="SourceAlpha" operator="in" result="tint" />
+                  <feComponentTransfer in="tint" result="body">
+                    <!-- the whole point: the stroke centres stay see-through -->
+                    <feFuncA type="linear" slope="0.2" />
+                  </feComponentTransfer>
+
+                  <!-- EDGE BAND — erode the shape, subtract it, and what's
+                       left is a thin ribbon hugging every curve. All light
+                       lives here, so the centres are never covered. -->
+                  <feMorphology in="SourceAlpha" operator="erode" radius="9" result="core" />
+                  <feComposite in="SourceAlpha" in2="core" operator="out" result="edgeRaw" />
+                  <feGaussianBlur in="edgeRaw" stdDeviation="4" result="edge" />
+
+                  <!-- a faint continuous contour so the word reads at distance -->
+                  <feFlood flood-color="#eaf5ff" flood-opacity="0.42" result="contourCol" />
+                  <feComposite in="contourCol" in2="edge" operator="in" result="contour" />
+
+                  <!-- restrained directional glints, clipped to the band -->
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="bump" />
+                  <feSpecularLighting in="bump" surfaceScale="8" specularConstant="1.05"
+                                      specularExponent="30" lighting-color="#ffffff" result="spec">
+                    <fePointLight x="280" y="0" z="260" />
+                  </feSpecularLighting>
+                  <feComposite in="spec" in2="edge" operator="in" result="specEdge" />
+
+                  <feSpecularLighting in="bump" surfaceScale="7" specularConstant="0.6"
+                                      specularExponent="12" lighting-color="#cfe6ff" result="rim">
+                    <fePointLight x="820" y="440" z="220" />
+                  </feSpecularLighting>
+                  <feComposite in="rim" in2="edge" operator="in" result="rimEdge" />
+
+                  <!-- ASSEMBLE — clear body, then contour, then glints -->
+                  <feComposite in="contour" in2="body" operator="over" result="s1" />
+                  <feComposite in="specEdge" in2="s1" operator="arithmetic"
+                               k1="0" k2="1" k3="1" k4="0" result="s2" />
+                  <feComposite in="rimEdge" in2="s2" operator="arithmetic"
+                               k1="0" k2="1" k3="1" k4="0" result="s3" />
+
+                  <feDropShadow in="s3" dx="0" dy="14" stdDeviation="16"
+                                flood-color="#2a5c9c" flood-opacity="0.13" />
+                </filter>
+              </defs>
+
+              <!-- Both passes warp together, so bloom and glass stay locked -->
+              <g id="helloWarp">
+                <!-- barely-there bloom; enough to seat it in the sky, not
+                     enough to fog the letters -->
+                <text class="hello-type" x="480" y="300" text-anchor="middle"
+                      fill="#7fb3ec" opacity="0.16" filter="url(#hGlow)">hello</text>
+
+                <!-- the glass. stroke-width is deliberately small: it rounds
+                     the terminals without thickening the strokes into a mass -->
+                <text class="hello-type" id="helloWord" x="480" y="300" text-anchor="middle"
+                      fill="url(#hGrad)" stroke="url(#hGrad)" stroke-width="10"
+                      stroke-linejoin="round" stroke-linecap="round" paint-order="stroke"
+                      filter="url(#hGlass)">hello</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="mega" data-fr="JE CRÉE<br />DES MARQUES QUI<br />VONT JUSQU'AU BOUT">I BRING<br />CRAFT &amp; TASTE<br />TO EVERY BRAND</h1>
+    </section>
+
+    <!-- Work -->
+    <section class="block" id="work">
+      <div class="block-head mono">
+        <span data-fr="PROJETS">SELECTED WORK</span>
+        <span class="dim">04</span>
+      </div>
+
+      <ul class="list">
+        <li class="row">
+          <button class="row-btn" aria-expanded="false">
+            <span class="row-i mono">01</span>
+            <span class="row-title" data-fr="Identité de marque">Brand identity</span>
+            <span class="row-cat mono">BRANDING</span>
+            <span class="row-year mono">2024—25</span>
+            <span class="row-mark mono" aria-hidden="true">+</span>
+          </button>
+          <div class="row-panel"><div class="row-panel-in">
+            <p data-fr="Une identité visuelle complète pour une marque émergente — système de logo, palette, typographie et charte, pensés pour tenir sur tous les supports.">A complete visual identity for an emerging brand — logo system, color
+              world, typography and guidelines, built to hold up across every touchpoint.</p>
+            <ul class="chips mono"><li>LOGO</li><li data-fr="CHARTE">GUIDELINES</li><li>PRINT</li></ul>
+          </div></div>
+        </li>
+
+        <li class="row">
+          <button class="row-btn" aria-expanded="false">
+            <span class="row-i mono">02</span>
+            <span class="row-title" data-fr="Design d'application">App design</span>
+            <span class="row-cat mono">UI / UX</span>
+            <span class="row-year mono">2024</span>
+            <span class="row-mark mono" aria-hidden="true">+</span>
+          </button>
+          <div class="row-panel"><div class="row-panel-in">
+            <p data-fr="Une expérience mobile conçue de bout en bout — des parcours utilisateurs aux wireframes, jusqu'à un prototype interactif prêt pour le développement.">A full mobile experience designed end to end — from user flows and
+              wireframes to a polished, interactive prototype ready for development.</p>
+            <ul class="chips mono"><li>MOBILE</li><li>PROTOTYPE</li><li>DESIGN SYSTEM</li></ul>
+          </div></div>
+        </li>
+
+        <li class="row">
+          <button class="row-btn" aria-expanded="false">
+            <span class="row-i mono">03</span>
+            <span class="row-title" data-fr="Direction artistique">Art direction</span>
+            <span class="row-cat mono" data-fr="CAMPAGNE">CAMPAIGN</span>
+            <span class="row-year mono">2023—24</span>
+            <span class="row-mark mono" aria-hidden="true">+</span>
+          </button>
+          <div class="row-panel"><div class="row-panel-in">
+            <p data-fr="Une campagne visuelle et un univers graphique pour les réseaux sociaux — un langage cohérent, pensé pour arrêter le scroll et installer la reconnaissance.">A visual campaign and graphic universe for social media — a consistent
+              language designed to stop the scroll and build recognition.</p>
+            <ul class="chips mono"><li>SOCIAL</li><li data-fr="CONTENU">CONTENT</li><li>MOTION</li></ul>
+          </div></div>
+        </li>
+
+        <li class="row">
+          <button class="row-btn" aria-expanded="false">
+            <span class="row-i mono">04</span>
+            <span class="row-title" data-fr="Site vitrine">Showcase website</span>
+            <span class="row-cat mono">WEB</span>
+            <span class="row-year mono">2023</span>
+            <span class="row-mark mono" aria-hidden="true">+</span>
+          </button>
+          <div class="row-panel"><div class="row-panel-in">
+            <p data-fr="Design web et maquette responsive pour une boutique en ligne — une mise en page claire, orientée conversion, qui laisse la place aux produits.">Web design and a responsive mockup for an online store — a clean,
+              conversion-focused layout that leaves room for the products.</p>
+            <ul class="chips mono"><li>E-COMMERCE</li><li>RESPONSIVE</li><li>ART DIRECTION</li></ul>
+          </div></div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Expertise -->
+    <section class="block" id="expertise">
+      <div class="block-head mono">
+        <span>EXPERTISE</span>
+        <span class="dim">03</span>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h3>Branding</h3>
+          <ul>
+            <li data-fr="Identité de marque">Brand identity</li>
+            <li data-fr="Création de logo">Logo design</li>
+            <li data-fr="Chartes graphiques">Visual guidelines</li>
+            <li data-fr="Print &amp; édition">Print &amp; editorial</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3 data-fr="Direction artistique">Art direction</h3>
+          <ul>
+            <li>Moodboards</li>
+            <li data-fr="Univers visuel">Visual world</li>
+            <li data-fr="Campagnes">Campaigns</li>
+            <li data-fr="Création de contenu">Content creation</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3>UI / UX</h3>
+          <ul>
+            <li>Wireframing</li>
+            <li data-fr="Prototypage">Prototyping</li>
+            <li>Design systems</li>
+            <li data-fr="Web &amp; mobile">Web &amp; mobile</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="block" id="about">
+      <div class="block-head mono">
+        <span data-fr="À PROPOS">ABOUT</span>
+        <span class="dim">SA</span>
+      </div>
+      <div class="about">
+        <p class="big" data-fr="Passionnée par la création visuelle, j'aide les marques et les créateurs à transformer une intuition en quelque chose que l'on reconnaît au premier regard.">Passionate about visual creation, I help brands and creators turn a hunch
+          into something people recognise at a glance.</p>
+        <p data-fr="De l'identité visuelle au design d'interface, j'aime mêler couleur, mouvement et sens pour créer des projets qui se démarquent vraiment. Des petits détails, un grand impact — et jamais de demi-mesure.">From visual identity to interface design, I like blending color, motion and
+          meaning to craft projects that genuinely stand out. Small details, big impact —
+          and no half measures.</p>
+        <ul class="chips mono wide">
+          <li data-fr="À FOND, TOUJOURS">ALL IN, ALWAYS</li>
+          <li data-fr="AUDACIEUSE PAR NATURE">BOLD BY DEFAULT</li>
+          <li data-fr="OBSÉDÉE DU DÉTAIL">DETAIL-OBSESSED</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Contact -->
+  <footer class="foot" id="contact">
+    <h2 class="mega small" data-fr="CRÉONS QUELQUE CHOSE<br />D'EXTRAORDINAIRE">LET'S CREATE SOMETHING<br />EXTRAORDINARY</h2>
+    <a class="mail mono" href="mailto:sylia.adele.lakrib@gmail.com">SYLIA.ADELE.LAKRIB@GMAIL.COM</a>
+    <ul class="links mono">
+      <li><a href="https://www.linkedin.com/in/sylia-ad%C3%A8le-lakrib" target="_blank" rel="noopener">LINKEDIN <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://www.instagram.com/sylia.adele.graphics/" target="_blank" rel="noopener">INSTAGRAM <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://syliaadelelakrib.myportfolio.com/" target="_blank" rel="noopener">PORTFOLIO <span aria-hidden="true">↗</span></a></li>
+    </ul>
+    <p class="mono dim colophon">© <span id="year"></span> SYLIA ADÈLE LAKRIB — <span data-fr="CONÇU À PARIS">DESIGNED IN PARIS</span></p>
+  </footer>
+
+  <!-- Bottom status bar -->
+  <div class="status mono" aria-hidden="true">
+    <span id="clock">GMT+2 FR --:--</span>
+    <span id="coords">0000 X 0000 Y</span>
+    <span class="globe">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="12" cy="12" r="9" />
+        <ellipse cx="12" cy="12" rx="4" ry="9" />
+        <path d="M3 12h18M4.5 7h15M4.5 17h15" />
+      </svg>
+    </span>
+  </div>
+
+  <!-- Custom arrow cursor -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <svg viewBox="0 0 32 36" width="34" height="38">
+      <defs>
+        <linearGradient id="curGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8fc0f5" />
+          <stop offset="45%" stop-color="#4a8fe0" />
+          <stop offset="100%" stop-color="#2b62b8" />
+        </linearGradient>
+      </defs>
+      <path d="M3 2 L29 17 L17 20 L12 33 Z" fill="url(#curGrad)" stroke="rgba(255,255,255,.55)" stroke-width="1.2" stroke-linejoin="round" />
+    </svg>
+  </div>
+
+  <script src="sky.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
