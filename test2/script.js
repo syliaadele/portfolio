@@ -119,32 +119,21 @@ function sizeHello() {
 sizeHello();
 window.addEventListener("resize", sizeHello, { passive: true });
 
-/* PHONE PERFORMANCE.
-   The glass filter is 24 primitives — two lighting passes, a
-   morphology, a turbulence and a displacement — and the two SMIL
-   <animate> tags on its gradient make the browser re-run all of it
-   every single frame. Desktop GPUs shrug; phones do not.
-   Below 900px the word keeps its shape and translucency but is drawn
-   with plain fill and stroke instead, which costs essentially nothing. */
-function liteHello() {
+/* PHONE PERFORMANCE — one targeted cut, nothing else.
+   The glass keeps its full 24-primitive filter everywhere, so it looks
+   identical on a phone. What goes is the pair of SMIL <animate> tags
+   that slide the gradient: they change the filter's input 60 times a
+   second, which makes the browser re-run the whole chain every frame.
+   Removing them leaves the rendered result byte-for-byte the same in a
+   still image, and lets the browser rasterise it once. */
+function calmHello() {
   if (window.innerWidth >= 900 && window.matchMedia("(pointer: fine)").matches) {
     return false;
   }
   document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
-  if (helloWord) {
-    helloWord.removeAttribute("filter");
-    helloWord.setAttribute("fill", "rgba(255, 255, 255, .26)");
-    helloWord.setAttribute("stroke", "rgba(255, 255, 255, .8)");
-    helloWord.setAttribute("stroke-width", "3");
-  }
-  /* the halo behind it is a full-size Gaussian blur of its own */
-  document.querySelectorAll('.hello-svg text[filter="url(#hGlow)"]').forEach(
-    (t) => t.remove()
-  );
-  document.querySelector(".hello-refract")?.remove();
   return true;
 }
-const helloIsLite = liteHello();
+const helloIsLite = calmHello();
 
 // Hold the reveal until the script font is ready — the filter would
 // otherwise light a fallback serif for a frame, and the measurement

@@ -378,24 +378,16 @@
       sizeHello();
       window.addEventListener("resize", sizeHello, { passive: true });
 
-      /* Phones: the 24-primitive glass filter plus its two SMIL
-         gradient animations force a full re-render every frame. Below
-         900px the word is drawn with plain fill and stroke instead. */
+      /* The glass keeps its full filter on every screen. Only the two
+         SMIL gradient animations are dropped on phones: they changed
+         the filter's input every frame, forcing the whole 24-primitive
+         chain to re-run. The still image is unchanged. */
       const lite =
         window.innerWidth < 900 ||
         !window.matchMedia("(pointer: fine)").matches;
 
       if (lite) {
         document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
-        helloWord.removeAttribute("filter");
-        helloWord.setAttribute("fill", "rgba(255, 255, 255, .26)");
-        helloWord.setAttribute("stroke", "rgba(255, 255, 255, .8)");
-        helloWord.setAttribute("stroke-width", "3");
-        document
-          .querySelectorAll('.hello-svg text[filter="url(#hGlow)"]')
-          .forEach((t) => t.remove());
-        const refract = document.querySelector(".hello-refract");
-        if (refract) refract.remove();
       }
 
       const reveal = () =>

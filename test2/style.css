@@ -692,9 +692,6 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   /* backdrop-filter over a large area is the expensive part — drop the
      refraction pass on small screens and keep the lit glass */
   .hello-refract { display: none; }
-  /* A transform on a filtered element makes phones re-rasterise it
-     every frame, so the idle float stops here. */
-  .hello-drift { animation: none; }
   /* fewer compositor layers = less memory pressure on mobile GPUs */
   .cloud, .cloud-i, .sky-layer { will-change: auto; }
   .top-nav { gap: 1rem; font-size: .7rem; }
