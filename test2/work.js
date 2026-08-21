@@ -11,19 +11,34 @@ const yearEl = document.getElementById("year");
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 // ===== Column grid with crosshairs =====
+// Positions come from the CSS custom properties (see script.js), so the
+// rules stay locked to the text that style.css aligns to them.
+const gridPos = (names) => {
+  const cs = getComputedStyle(root);
+  return names.map((n) => cs.getPropertyValue(n).trim()).filter(Boolean);
+};
+
 const grid = document.getElementById("grid");
+const GRID_COLS = gridPos(["--c1", "--c2", "--c3", "--c4"]);
+const GRID_ROWS = gridPos(["--r1", "--r2"]);
 if (grid) {
-  [3.5, 34, 65.5, 96.5].forEach((left) => {
+  GRID_COLS.forEach((left) => {
     const line = document.createElement("div");
     line.className = "gline";
-    line.style.left = left + "%";
-    [33, 68].forEach((top) => {
+    line.style.left = left;
+    GRID_ROWS.forEach((top) => {
       const plus = document.createElement("span");
       plus.className = "plus";
-      plus.style.top = top + "%";
+      plus.style.top = top;
       plus.textContent = "+";
       line.appendChild(plus);
     });
+    grid.appendChild(line);
+  });
+  GRID_ROWS.forEach((top) => {
+    const line = document.createElement("div");
+    line.className = "hline";
+    line.style.top = top;
     grid.appendChild(line);
   });
 }

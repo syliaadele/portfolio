@@ -25,6 +25,31 @@
 
   --pad: clamp(1.15rem, 3.4vw, 3.25rem);
   --ease: cubic-bezier(.22, 1, .36, 1);
+
+  /* --- column grid -------------------------------------------------
+     The four vertical rules and two horizontal ones, as % of the
+     viewport. script.js / work.js read these back rather than carrying
+     their own copy, so the rules and the text aligned to them can
+     never drift apart. Sections span --c1 → --c4; --gutter is what
+     every text block adds to clear its own rule. */
+  /* Outer edge is a flat 60px rather than a % of the viewport. The two
+     inner rules keep the 30.5 : 31.5 : 31 rhythm, now measured across the
+     span between those edges — and since the fr ratios in .hero-cols,
+     .cols and .top are those same numbers, the columns follow on their
+     own. --edge is the only value to touch. */
+  --edge: 20px;
+  --c1: var(--edge);
+  --c2: calc(var(--edge) + (100% - 2 * var(--edge)) * 30.5 / 93);
+  --c3: calc(var(--edge) + (100% - 2 * var(--edge)) * 62 / 93);
+  --c4: calc(100% - var(--edge));
+  --r1: 33%;
+  --r2: 68%;
+  --gutter: 20px;
+
+  /* The rules are decoration, not structure: far fainter and thinner
+     than the UI borders, which keep using --line. */
+  --grid-line: rgba(0, 0, 0, .055);
+  --grid-w: .5px;
 }
 
 :root[data-theme="dark"] {
@@ -37,6 +62,7 @@
   --ink-2: rgba(255, 255, 255, .66);
   --ink-3: rgba(255, 255, 255, .36);
   --line: rgba(255, 255, 255, .14);
+  --grid-line: rgba(255, 255, 255, .065);
   --panel: rgba(255, 255, 255, .06);
   --pill: rgba(255, 255, 255, .15);
   --pill-line: rgba(255, 255, 255, .26);
@@ -79,7 +105,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* --- column grid ------------------------------------------------ */
 
 .grid { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
-.gline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.gline { position: absolute; top: 0; bottom: 0; width: var(--grid-w); background: var(--grid-line); }
+.hline { position: absolute; left: 0; right: 0; height: var(--grid-w); background: var(--grid-line); }
 .plus {
   position: absolute;
   left: 50%;
@@ -87,7 +114,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   font-family: var(--mono);
   font-size: .8rem;
   line-height: 1;
-  color: var(--line);
+  color: var(--grid-line);
 }
 
 /* --- top bar ---------------------------------------------------- */
@@ -116,31 +143,45 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .menu-open .burger span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .menu-open .burger span:nth-child(2) { transform: translateY(-6.5px) rotate(-45deg); }
 
+/* Two tracks split on rule 3 (62 = --c3 - --c1, 31 = --c4 - --c3), so the
+   nav starts on the same verticalcolumn 3 does — i.e. WORK sits directly
+   above the bio paragraph. gap must be 0 or the split misses the rule. */
 .top {
   position: relative;
   z-index: 5;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 62fr) minmax(0, 31fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: 1.15rem var(--pad);
+  gap: 0;
+  padding: 1.15rem calc(100% - var(--c4)) 1.15rem var(--c1);
 }
 
 .wordmark {
+  padding-left: var(--gutter);
   font-family: var(--mono);
   font-size: .84rem;
   font-weight: 500;
   letter-spacing: .04em;
 }
 
+/* space-between rather than a fixed gap: the band is fixed by the rules,
+   so distributing the slack is what keeps the five labels evenly spaced
+   at any width. The gap is only a floor. */
 .top-nav {
   display: flex;
   align-items: center;
-  gap: clamp(1.1rem, 3.6vw, 3.6rem);
+  justify-content: space-between;
+  /* no floor: the band between rules 3 and 4 is tight, and any minimum
+     here would push the last label past the rule instead of just closing
+     the gaps up */
+  gap: 0;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
   font-family: var(--mono);
   font-size: .78rem;
   letter-spacing: .04em;
 }
+.top-nav > * { white-space: nowrap; }
 /* Sound on: a small equaliser next to the label so the state reads at a
    glance, not just from the word inside the brackets. */
 #sound.is-on::after {
@@ -226,17 +267,27 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   flex-direction: column;
   justify-content: space-between;
   min-height: calc(100svh - 4.5rem);
-  padding: clamp(1.5rem, 4vh, 3rem) var(--pad) clamp(4rem, 9vh, 6rem);
+  /* content box runs rule 1 → rule 4 */
+  padding: clamp(1.5rem, 4vh, 3rem) calc(100% - var(--c4)) clamp(4rem, 9vh, 6rem) var(--c1);
 }
 
+/* Column widths are the gaps between the rules — 30.5 : 31.5 : 31 —
+   so with no gap the internal edges land exactly on --c2 and --c3, and
+   each child's own padding is what holds it off its rule. */
 .hero-cols {
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: 1.1fr 1fr 1.15fr;
-  gap: clamp(1.5rem, 4vw, 3rem);
+  /* minmax(0, …): without it an fr track has an auto minimum, so a text
+     block wider than its column would push the track and drag the rules
+     with it. This keeps the columns fixed and lets the text overhang. */
+  grid-template-columns: minmax(0, 30.5fr) minmax(0, 31.5fr) minmax(0, 31fr);
+  gap: 0;
   align-items: start;
 }
+
+/* every column clears the rule on its left, and stops short of the next */
+.hero-cols > * { padding-left: var(--gutter); padding-right: var(--gutter); }
 
 .discipline {
   font-size: clamp(1.4rem, 2.5vw, 2.15rem);
@@ -246,11 +297,36 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 
 .statement { color: var(--ink); }
-.bio { color: var(--ink); max-width: 46ch; }
+
+/* The bio's line count is deliberate: its 156 characters wrap to four
+   lines at 40 per line and to three at 58.
+   `width` rather than `max-width`, because at narrower viewports column 3
+   is the tighter of the two and a cap would just let the column win — the
+   paragraph is allowed to overhang instead, since the columns must not move.
+   The unit is not plain `ch`: that is the width of the "0" glyph and
+   ignores letter-spacing, so a 40ch box only holds ~38 characters. Adding
+   the .02em that .mono tracks makes it one real character wide.
+   box-sizing is border-box project-wide, so the two gutters have to be
+   added back or they eat into the character count — and the text would
+   stop well short of the next rule. */
+.bio { color: var(--ink); width: calc(40 * (1ch + .02em) + 2 * var(--gutter)); }
+
+/* 58 characters per line fits three lines, and still lands inside
+   column 3 at this viewport */
+@media (min-width: 1700px) {
+  .bio { width: calc(58 * (1ch + .02em) + 2 * var(--gutter)); }
+}
+
+/* narrower than this the overhang would cross the last rule, so the
+   paragraph goes back to simply filling its column */
+@media (max-width: 1023px) {
+  .bio { width: auto; }
+}
 
 .mega {
   position: relative;
   z-index: 3;
+  padding-left: var(--gutter);
   font-size: min(75px, 11vw);
   font-weight: 800;
   line-height: .93;
@@ -267,7 +343,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hello {
   position: absolute;
   left: 50%;
-  top: 39%;
+  top: calc(39% + 50px);
   width: 960px;
   height: 420px;
   /* Centred with `translate` rather than negative margins: margins are
@@ -358,7 +434,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .85rem var(--pad);
+  padding: .85rem calc(100% - var(--c4) + var(--gutter)) .85rem calc(var(--c1) + var(--gutter));
   font-size: .72rem;
   letter-spacing: .05em;
   pointer-events: none;
@@ -369,16 +445,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 main { position: relative; z-index: 2; }
 
+/* No max-width: these have to share the hero's edges, and the hero is
+   flush to the rules, which are viewport-relative. Capping the width
+   here is what used to pull every section inboard of the headline on
+   wide screens. */
 .block {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: clamp(3.5rem, 9vw, 7rem) var(--pad);
+  padding: clamp(3.5rem, 9vw, 7rem) calc(100% - var(--c4)) clamp(3.5rem, 9vw, 7rem) var(--c1);
 }
 
 .block-head {
   display: flex;
   justify-content: space-between;
-  padding-bottom: .8rem;
+  padding: 0 var(--gutter) .8rem;
   border-bottom: 1px solid var(--line);
   letter-spacing: .12em;
 }
@@ -392,11 +470,12 @@ main { position: relative; z-index: 2; }
   align-items: center;
   gap: 1rem;
   width: 100%;
-  padding: 1.4rem .6rem;
+  padding: 1.4rem var(--gutter);
   text-align: left;
   transition: background .3s var(--ease), padding-left .3s var(--ease);
 }
-.row-btn:hover { background: var(--panel); padding-left: 1.2rem; }
+/* hover still nudges the row right, now measured from the gutter */
+.row-btn:hover { background: var(--panel); padding-left: calc(var(--gutter) + .6rem); }
 
 .row-i, .row-cat, .row-year, .row-meta { color: var(--ink-2); letter-spacing: .08em; }
 .row-meta { text-align: right; }
@@ -404,6 +483,7 @@ main { position: relative; z-index: 2; }
 .work-all {
   display: inline-block;
   margin-top: 2rem;
+  margin-left: var(--gutter);
   padding-bottom: 3px;
   border-bottom: 1px solid var(--line);
   letter-spacing: .1em;
@@ -436,8 +516,8 @@ main { position: relative; z-index: 2; }
   transition: opacity .4s var(--ease) .08s, transform .4s var(--ease) .08s;
 }
 .row.open .row-panel-in > * { opacity: 1; transform: none; }
-.row-panel-in p { max-width: 62ch; margin: 0 0 1.1rem; padding: 0 .6rem; color: var(--ink-2); }
-.row-panel-in .chips { padding: 0 .6rem 1.7rem; }
+.row-panel-in p { max-width: 62ch; margin: 0 0 1.1rem; padding: 0 var(--gutter); color: var(--ink-2); }
+.row-panel-in .chips { padding: 0 var(--gutter) 1.7rem; }
 
 .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
 .chips li {
@@ -449,13 +529,14 @@ main { position: relative; z-index: 2; }
   color: var(--ink-2);
 }
 
-/* expertise */
+/* expertise — same three columns as the hero, on the same rules */
 .cols {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: minmax(0, 30.5fr) minmax(0, 31.5fr) minmax(0, 31fr);
+  gap: 0;
   padding-top: 2.5rem;
 }
+.cols > * { padding-left: var(--gutter); padding-right: var(--gutter); }
 .col h3 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 1rem; }
 .col ul li {
   padding: .55rem 0;
@@ -467,7 +548,7 @@ main { position: relative; z-index: 2; }
 .col ul li:hover { color: var(--ink); padding-left: .4rem; }
 
 /* about */
-.about { max-width: 64ch; padding-top: 2.5rem; }
+.about { max-width: 64ch; padding-top: 2.5rem; padding-left: var(--gutter); }
 .about .big {
   font-size: clamp(1.4rem, 2.9vw, 2.1rem);
   font-weight: 700;
@@ -483,9 +564,7 @@ main { position: relative; z-index: 2; }
 .foot {
   position: relative;
   z-index: 2;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: clamp(4rem, 10vw, 8rem) var(--pad) 5.5rem;
+  padding: clamp(4rem, 10vw, 8rem) calc(100% - var(--c4)) 5.5rem var(--c1);
   border-top: 1px solid var(--line);
 }
 .mega.small { font-size: clamp(1.9rem, 6vw, 5.4rem); }
@@ -535,7 +614,7 @@ main { position: relative; z-index: 2; }
   );
 }
 
-.foot-inner { position: relative; z-index: 1; }
+.foot-inner { position: relative; z-index: 1; padding-left: var(--gutter); }
 
 .foot-label {
   display: inline-flex;
@@ -670,7 +749,7 @@ main { position: relative; z-index: 2; }
 .links { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2.5rem; letter-spacing: .06em; }
 .links a { color: var(--ink-2); transition: color .25s; }
 .links a:hover { color: var(--ink); }
-.colophon { margin-top: 2.5rem; letter-spacing: .06em; }
+.colophon { margin-top: 2.5rem; padding-left: var(--gutter); letter-spacing: .06em; }
 
 /* --- custom cursor ---------------------------------------------- */
 
@@ -696,7 +775,20 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
 
 @media (max-width: 900px) {
   .hero-cols { grid-template-columns: 1fr; gap: 1.25rem; }
-  .bio { max-width: none; }
+  /* below the 3-column layout there are no rules to align to, so the
+     expertise columns go back to flowing on their own */
+  .cols { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(2rem, 5vw, 4rem); }
+
+  /* single column: the nav has no rule 3 to align to, so the bar goes
+     back to wordmark-left / nav-right */
+  .top {
+    display: flex;
+    justify-content: space-between;
+    padding-left: calc(var(--c1) + var(--gutter));
+    padding-right: calc(100% - var(--c4) + var(--gutter));
+  }
+  .wordmark, .top-nav { padding-left: 0; padding-right: 0; }
+  .top-nav { justify-content: flex-end; }
   /* Phones only: the word sits right at the top, above the discipline
      heading, and its strokes are thicker. CSS overrides the SVG
      presentation attribute, so desktop keeps stroke-width="10". */
@@ -715,7 +807,7 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
     grid-template-columns: 2.5rem minmax(0, 1fr) 1.5rem;
     grid-template-areas: "i title mark" ". meta .";
     row-gap: .35rem;
-    padding: 1.1rem .4rem;
+    padding: 1.1rem var(--gutter);
   }
   .row-i { grid-area: i; align-self: start; padding-top: .45rem; }
   .row-title { grid-area: title; }
@@ -729,6 +821,15 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
 /* Five nav items never fit beside the wordmark, so below this width
    they collapse behind a burger and drop down as a glass panel. */
 @media (max-width: 640px) {
+  /* A phone has no room to hold text 20px off a rule that is itself
+     only ~13px from the edge: sections go back to --pad and the inner
+     gutters collapse, which keeps the tuned mobile layout untouched. */
+  /* 60px each side is a third of a phone's width, so the edge falls back
+     to --pad — which also keeps the first rule on the text edge. */
+  :root { --gutter: 0px; --edge: var(--pad); }
+  .hero { padding-left: var(--pad); padding-right: var(--pad); }
+  .foot { padding-left: var(--pad); padding-right: var(--pad); }
+
   .top { padding: .9rem var(--pad); }
   .wordmark { font-size: .78rem; }
   .burger { display: block; }
@@ -827,7 +928,7 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   .top-nav a:hover::before,
   .top-nav button:hover::before { opacity: 0; }
 
-  .row-btn:hover { background: none; padding-left: .6rem; }
+  .row-btn:hover { background: none; padding-left: var(--gutter); }
   .col ul li:hover { color: var(--ink-2); padding-left: 0; }
   .links a:hover { color: var(--ink-2); }
   .mail:hover { border-color: var(--line); }

@@ -4,18 +4,34 @@ document.getElementById("year").textContent = new Date().getFullYear();
 const root = document.documentElement;
 
 // ===== Column grid with crosshairs =====
+// Positions come from the CSS custom properties, not from a copy kept
+// here: style.css aligns the text to the same --c1..--c4 / --r1--r2, so
+// reading them back is what stops the rules and the type from drifting.
+const gridPos = (names) => {
+  const cs = getComputedStyle(root);
+  return names.map((n) => cs.getPropertyValue(n).trim()).filter(Boolean);
+};
+
 const grid = document.getElementById("grid");
-[3.5, 34, 65.5, 96.5].forEach((left) => {
+const GRID_COLS = gridPos(["--c1", "--c2", "--c3", "--c4"]);
+const GRID_ROWS = gridPos(["--r1", "--r2"]);
+GRID_COLS.forEach((left) => {
   const line = document.createElement("div");
   line.className = "gline";
-  line.style.left = left + "%";
-  [33, 68].forEach((top) => {
+  line.style.left = left;
+  GRID_ROWS.forEach((top) => {
     const plus = document.createElement("span");
     plus.className = "plus";
-    plus.style.top = top + "%";
+    plus.style.top = top;
     plus.textContent = "+";
     line.appendChild(plus);
   });
+  grid.appendChild(line);
+});
+GRID_ROWS.forEach((top) => {
+  const line = document.createElement("div");
+  line.className = "hline";
+  line.style.top = top;
   grid.appendChild(line);
 });
 
