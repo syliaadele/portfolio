@@ -19,13 +19,18 @@
     /* Page-specific layout only — everything else comes from style.css */
 
     .soon {
+      /* Lifts the word and the content together. The group is centred, so
+         padding at the bottom shrinks the centring area and raises it by
+         half — hence the x2, which makes this value the real lift. */
+      --soon-lift: 60px;
+
       position: relative;
       z-index: 2;
       display: flex;
       flex-direction: column;
       justify-content: center;
       min-height: calc(100svh - 8rem);
-      padding: 0 var(--pad);
+      padding: 0 var(--pad) calc(var(--soon-lift) * 2);
       text-align: center;
     }
 
@@ -36,8 +41,41 @@
       margin: 0 auto;
     }
 
-    /* the glass wordmark sits behind the name, as on the new site */
-    .soon .hello { top: 38%; }
+    /* The glass wordmark sits above the badge, not behind the name. It
+       joins the flow, so .soon centres it and .soon-inner as one group and
+       the two can never overlap whatever the viewport height.
+
+       Layout still reserves the full 960x420 box — transform: scale()
+       shrinks what you see, never the box — while the letterforms are only
+       --hello-ink of that height. The negative margins collapse the slot
+       down to the scaled ink, so the badge sits just under the word.
+       --hello-ink is the single value to nudge if that gap looks off. */
+    .soon .hello {
+      --hello-ink: 230px;
+      --hello-slack: calc(210px - var(--hello-ink) / 2 * var(--k, 1));
+      /* How far the word sits below its slot. Pure visual: translate never
+         touches the flow, so dropping the word leaves the badge put. */
+      --hello-drop: 70px;
+      /* Height of the slot's bottom spacing. Air under the word is
+         --hello-gap minus --hello-drop, so keep the gap the larger of the
+         two or the word will reach the badge.
+
+         This is also what sets how low the whole badge/name block sits:
+         it rides on the slot height plus this gap, nothing else. Lower it
+         to bring the content up — and drop --hello-drop by about half as
+         much at the same time, or the word rises with it. */
+      --hello-gap: 6rem;
+
+      position: relative;
+      top: auto;
+      /* left + translate rather than margin auto: the box stays 960px wide
+         and must keep centring even when that overflows a narrow screen */
+      left: 50%;
+      translate: -50% var(--hello-drop);
+      z-index: 0;
+      margin-top: calc(-1 * var(--hello-slack));
+      margin-bottom: calc(var(--hello-gap) - var(--hello-slack));
+    }
 
     .soon-badge {
       display: inline-flex;
@@ -316,18 +354,35 @@
       document.getElementById("year").textContent = new Date().getFullYear();
 
       // Column grid with crosshairs
+      // Same construction as test2/script.js: the positions are read back
+      // from the CSS custom properties in style.css instead of being
+      // duplicated here, so this page's rules land exactly where the new
+      // site's do — including the two horizontal ones.
+      const gridPos = (names) => {
+        const cs = getComputedStyle(root);
+        return names.map((n) => cs.getPropertyValue(n).trim()).filter(Boolean);
+      };
+
       const grid = document.getElementById("grid");
-      [3.5, 34, 65.5, 96.5].forEach((left) => {
+      const GRID_COLS = gridPos(["--c1", "--c2", "--c3", "--c4"]);
+      const GRID_ROWS = gridPos(["--r1", "--r2"]);
+      GRID_COLS.forEach((left) => {
         const line = document.createElement("div");
         line.className = "gline";
-        line.style.left = left + "%";
-        [33, 68].forEach((top) => {
+        line.style.left = left;
+        GRID_ROWS.forEach((top) => {
           const plus = document.createElement("span");
           plus.className = "plus";
-          plus.style.top = top + "%";
+          plus.style.top = top;
           plus.textContent = "+";
           line.appendChild(plus);
         });
+        grid.appendChild(line);
+      });
+      GRID_ROWS.forEach((top) => {
+        const line = document.createElement("div");
+        line.className = "hline";
+        line.style.top = top;
         grid.appendChild(line);
       });
 
@@ -371,9 +426,14 @@
         } catch (e) {}
         /* bigger share of a phone screen, or it barely registers */
         const fill = window.innerWidth < 700 ? 0.86 : 0.52;
+        /* Size knob for this page: 1 = the original size, lower = smaller.
+           It multiplies AFTER the clamp on purpose — when the fill ratio
+           already exceeds the 1.25 ceiling, tuning `fill` changes nothing
+           at all, because the ceiling is what governs. */
+        const SIZE = 0.5;
         hello.style.setProperty(
           "--k",
-          Math.min(1.25, (window.innerWidth * fill) / w).toFixed(3)
+          (SIZE * Math.min(1.25, (window.innerWidth * fill) / w)).toFixed(3)
         );
       }
       sizeHello();
