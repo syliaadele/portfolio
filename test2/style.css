@@ -391,6 +391,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   backdrop-filter: blur(3px) saturate(1.4) brightness(1.03);
 }
 
+/* The hue shift lives inside the #hWarp filter, not here: a CSS
+   hue-rotate cannot be confined to the cursor. See index.html. */
 .hello-svg {
   position: absolute;
   inset: 0;
@@ -424,6 +426,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   0%, 100% { transform: translate3d(0, 0, 0) rotate(-2.6deg); }
   50%      { transform: translate3d(0, -24px, 0) rotate(-0.6deg); }
 }
+
+/* The sparkle trail under the cursor is deliberately styled from JS with
+   inline styles and animated through the Web Animations API — see
+   sparkTrail() in script.js. Nothing for it here on purpose: sky.css
+   already owns .star / .stars, and a stylesheet-driven version kept being
+   silently overridden. */
 
 /* --- status bar ------------------------------------------------- */
 

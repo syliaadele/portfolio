@@ -96,7 +96,44 @@
                            result="ripple" preserveAspectRatio="none" />
                   <feComposite in="ripple" in2="neutral" operator="over" result="cmap" />
                   <feDisplacementMap id="hWarpMap" in="SourceGraphic" in2="cmap"
-                                     scale="0" xChannelSelector="R" yChannelSelector="G" />
+                                     scale="0" xChannelSelector="R" yChannelSelector="G"
+                                     result="warped" />
+
+                  <!-- LOCAL HUE.
+                       Rotating the hue of the whole word is a one-liner in
+                       CSS, but it cannot be confined to the cursor. So the
+                       shift happens here instead: rotate everything, clip
+                       that copy to a soft disc parked on the pointer, and
+                       lay it back over the untouched word. Only the part
+                       being deformed changes colour, and the disc's alpha
+                       falloff is what makes the edge a gradient rather
+                       than a cut-out. -->
+                  <feColorMatrix id="hHueRot" in="warped" type="hueRotate"
+                                 values="0" result="rot" />
+
+                  <!-- hueRotate preserves luminance, so the new hues landed
+                       as deep as the original blue. This lifts them toward
+                       white: slope compresses the range, intercept raises
+                       its floor. Lifting all three channels equally also
+                       drops saturation a little, which is what makes them
+                       read as light rather than merely brighter.
+
+                       feFuncA is a separate axis: it thickens the tinted
+                       copy so the colour sits denser than the very sheer
+                       glass around it. Raise its slope for more presence,
+                       drop it to 1 to leave the word's own transparency
+                       exactly as it is. -->
+                  <feComponentTransfer in="rot" result="rotLight">
+                    <feFuncR type="linear" slope="0.72" intercept="0.28" />
+                    <feFuncG type="linear" slope="0.72" intercept="0.28" />
+                    <feFuncB type="linear" slope="0.72" intercept="0.28" />
+                    <feFuncA type="linear" slope="1.5" />
+                  </feComponentTransfer>
+
+                  <feImage id="hHueDisc" x="-9999" y="-9999" width="420" height="420"
+                           result="disc" preserveAspectRatio="none" />
+                  <feComposite in="rotLight" in2="disc" operator="in" result="patch" />
+                  <feComposite in="patch" in2="warped" operator="over" />
                 </filter>
 
                 <!-- CLEAR GLASS.
