@@ -29,12 +29,30 @@
   --sun-edge: #f5de96;
   --sun-limb: #eec777;
   --sun-rays: 250, 214, 140;
+  /* How far the centre lift pushes toward white. Needed here because the
+     two cream stops are only a few values apart, so mixing between them
+     alone moved nothing visible. */
+  --sun-lift: 0.55;
 
   --warm: 255, 246, 224;
 
-  --ink: #000;
-  --ink-2: rgba(0, 0, 0, .62);
-  --ink-3: rgba(0, 0, 0, .34);
+  /* Off-black, and slightly warm: pure #000 on a warm sky reads as a
+     screen colour, where a warm near-black reads as ink on paper. Held as
+     a triplet so the three levels share one value — the two faded ones
+     were literal rgba(0,0,0,…), so they would have stayed cold while the
+     solid text warmed up. */
+  --ink-rgb: 34, 28, 24;
+  --ink: rgb(var(--ink-rgb));
+  --ink-2: rgba(var(--ink-rgb), .62);
+  --ink-3: rgba(var(--ink-rgb), .34);
+
+  /* Ink for the type that sits ON the sun. The disc is light in BOTH
+     themes, so it needs one dark colour of its own rather than following
+     the theme — off-white on a pale sun is what became unreadable. A dark
+     blue rather than the off-black: it belongs to the sky the page has
+     just travelled through. Only the footer's lower block uses it; the
+     headline above the sun keeps the theme's own ink. */
+  --ink-sun-rgb: 28, 44, 68;
   --line: rgba(0, 0, 0, .13);
   --panel: rgba(255, 255, 255, .28);
   --pill: rgba(255, 255, 255, .15);      /* nav hover fill */
@@ -79,18 +97,22 @@
   --sky-2: #14304d;
   --sky-3: #0a1929;
 
-  /* a rising sun, not a setting one */
+  /* a rising sun, not a setting one. Light in both themes, which is why
+     the type that sits on it has its own ink — see --ink-sun-rgb. */
   --sun-hot: #fff8fa;
   --sun-core: #ffe2ea;
   --sun-edge: #e5aac2;
   --sun-limb: #bd82a4;
   --sun-rays: 244, 196, 218;
+  --sun-lift: 0.4;
 
   --warm: 120, 165, 225;
 
-  --ink: #fff;
-  --ink-2: rgba(255, 255, 255, .66);
-  --ink-3: rgba(255, 255, 255, .36);
+  /* the same idea inverted: warm off-white rather than pure #fff */
+  --ink-rgb: 244, 240, 232;
+  --ink: rgb(var(--ink-rgb));
+  --ink-2: rgba(var(--ink-rgb), .66);
+  --ink-3: rgba(var(--ink-rgb), .36);
   --line: rgba(255, 255, 255, .14);
   --grid-line: rgba(255, 255, 255, .065);
   --panel: rgba(255, 255, 255, .06);
@@ -655,6 +677,22 @@ main { position: relative; z-index: 2; }
   text-align: center;
 }
 .foot-links { justify-content: center; }
+
+/* The three blocks that land on the disc. Redeclaring the ink scale HERE
+   rather than swapping --ink-sun-rgb higher up is deliberate: --ink and
+   friends are declared on :root, so they are already resolved by the time
+   they inherit — overriding the triplet alone would change nothing. The
+   faded levels are also raised a little, because a dark blue at 34% on a
+   pale disc was legible in theory only. */
+.foot-mail,
+.foot-links,
+.foot--big .colophon {
+  --ink: rgb(var(--ink-sun-rgb));
+  --ink-2: rgba(var(--ink-sun-rgb), .74);
+  --ink-3: rgba(var(--ink-sun-rgb), .52);
+
+  color: var(--ink);
+}
 
 /* --- the sun ----------------------------------------------------- */
 /* A dome rather than a disc: a 2:1 box with only its top corners rounded

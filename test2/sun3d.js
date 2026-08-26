@@ -234,6 +234,10 @@ const FRAG = /* glsl */ `
 
   uniform vec3 cHot;
   uniform vec3 cCore;
+  /* the centre's target colour, --sun-hot pushed toward white by
+     --sun-lift. Themed, because how far it may whiten depends on whether
+     the type over it is dark or light. */
+  uniform vec3 cLift;
   uniform float uTime;
   uniform float uMarble;
   uniform float uContrast;
@@ -309,7 +313,7 @@ const FRAG = /* glsl */ `
     float u = clamp((1.0 - d) / max(uCapFrac, 0.001), 0.0, 1.0);
 
     vec3 col = mix(cCore, cHot, m * 0.55);
-    col = mix(col, mix(cHot, vec3(1.0), 0.55), u * uCentre);
+    col = mix(col, cLift, u * uCentre);
     col *= uGain;
 
     /* Under the cursor: the surface lifts toward white and its hue swings,
@@ -354,9 +358,13 @@ function readPalette(root) {
   /* Only these two now. --sun-edge and --sun-limb still exist in the
      stylesheet for the CSS fallback sun, but the disc here is a single
      tone, so nothing darker than the centre is carried across. */
+  const hot = new THREE.Color(pick("--sun-hot", "#fdf9de"));
+  const lift = parseFloat(pick("--sun-lift", "0.5"));
+
   return {
-    hot: new THREE.Color(pick("--sun-hot", "#fdf9de")),
+    hot,
     core: new THREE.Color(pick("--sun-core", "#f9efb8")),
+    lift: hot.clone().lerp(WHITE, Number.isFinite(lift) ? lift : 0.5),
   };
 }
 
@@ -403,6 +411,7 @@ export function mountSun(host) {
     uniforms: {
       cHot: { value: pal.hot },
       cCore: { value: pal.core },
+      cLift: { value: pal.lift },
       uTime: { value: 0 },
       uMarble: { value: 1.35 }, // replaced per layout, from marblePx
       uContrast: { value: LOOK.contrast },
@@ -648,6 +657,7 @@ export function mountSun(host) {
     const next = readPalette(root);
     sunMat.uniforms.cHot.value = next.hot;
     sunMat.uniforms.cCore.value = next.core;
+    sunMat.uniforms.cLift.value = next.lift;
     glowMat.uniforms.cGlow.value = next.hot.clone().lerp(WHITE, LOOK.glowWhite);
     start();
   }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
