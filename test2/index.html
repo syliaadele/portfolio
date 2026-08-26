@@ -376,7 +376,61 @@
   <!-- Contact — full-height finale. The sky clears behind it and the
        headline rises line by line, so the page lands somewhere. -->
   <footer class="foot foot--big" id="contact">
-    <div class="foot-glow" aria-hidden="true"></div>
+    <!-- Sets on the bottom edge of the page; the headline crosses its
+         upper half. Sibling of .foot-inner, not a child, so it is anchored
+         to the section rather than to the type.
+
+         The disc is an SVG because the volume needs an off-centre focal
+         highlight and real surface grain — a CSS radial-gradient can only
+         fall off from its own centre, which is why it read as flat. The
+         corona and flare stay on .sun's pseudo-elements, which is also why
+         the SVG needs a wrapper: pseudo-elements don't apply to an svg
+         root element. -->
+    <div class="sun" aria-hidden="true">
+      <svg class="sun-disc" viewBox="0 0 100 100">
+        <defs>
+          <!-- A LIT SPHERE, not a glowing disc. fx/fy pull the focal point
+               off centre, so the falloff runs across the ball instead of
+               radiating from the middle — that offset alone is most of the
+               three-dimensional read. stop-color goes through style so it
+               can reference the custom properties. -->
+          <radialGradient id="sunBody" cx="50%" cy="50%" r="50%" fx="40%" fy="32%">
+            <stop offset="0%"   style="stop-color: var(--sun-hot)" />
+            <stop offset="28%"  style="stop-color: var(--sun-hot)" />
+            <stop offset="57%"  style="stop-color: var(--sun-core)" />
+            <stop offset="84%"  style="stop-color: var(--sun-edge)" />
+            <stop offset="100%" style="stop-color: var(--sun-limb)" />
+          </radialGradient>
+
+          <!-- Limb darkening, concentric this time. A sphere loses light at
+               every edge, not only the one facing away from the highlight,
+               so this rides on top of the directional gradient. -->
+          <radialGradient id="sunLimb" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#000" stop-opacity="0" />
+            <stop offset="74%"  stop-color="#000" stop-opacity="0" />
+            <stop offset="93%"  stop-color="#3a1400" stop-opacity=".26" />
+            <stop offset="100%" stop-color="#2a0d00" stop-opacity=".5" />
+          </radialGradient>
+
+          <!-- Surface grain. Without matter on it, no gradient reads as a
+               sphere — this is what stops the disc looking like vector
+               art. Kept low-contrast and blended in overlay so it modulates
+               the shading rather than sitting on top of it. -->
+          <filter id="sunGrain" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="2.2"
+                          numOctaves="3" seed="9" result="n" />
+            <feColorMatrix in="n" type="matrix" result="g"
+                           values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0" />
+            <feComposite in="g" in2="SourceAlpha" operator="in" />
+          </filter>
+        </defs>
+
+        <circle cx="50" cy="50" r="50" fill="url(#sunBody)" />
+        <circle cx="50" cy="50" r="50" fill="#808080" filter="url(#sunGrain)"
+                style="mix-blend-mode: overlay" />
+        <circle cx="50" cy="50" r="50" fill="url(#sunLimb)" />
+      </svg>
+    </div>
 
     <div class="foot-inner">
       <span class="foot-label mono">

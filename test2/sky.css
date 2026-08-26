@@ -11,12 +11,58 @@
    --------------------------------------------------------------- */
 
 .sky {
-  /* --- palette — the main things worth tweaking --- */
-  --sky-high: #5fa3e8;   /* zenith        */
-  --sky-mid: #9ac9f3;    /* middle band   */
-  --sky-low: #dcecfb;    /* horizon glow  */
+  /* --- palette — the main things worth tweaking ---
+     Every colour is a journey between two ends, mixed by --warmth: the
+     scroll position eased so that nothing warms until the last third of
+     the page (see journey() in script.js). Nothing here animates on its
+     own — scrolling IS the time of day.
+
+     Each theme states its own pair, so the light one runs midday -> dusk
+     while the dark one runs night -> dawn off the same value. Only the
+     -dep / -arr values below are worth editing.
+
+     Mixed in oklab: through sRGB, a blue-to-amber path sags into grey
+     halfway across. Even in oklab it passes near a neutral, which is
+     exactly why --warmth compresses that crossing into the final stretch
+     instead of spreading it over the whole scroll.
+
+     The clouds are deliberately NOT part of the mix. They are coloured by
+     --cloud-* inside an SVG gradient, and each one carries a blur() that
+     sky.js rasterises exactly once (see the note there). Recolouring them
+     would throw that raster away on every step of the scroll. The warm
+     light on them comes from the wash in .sky::after instead, which only
+     changes opacity and so touches no raster at all. */
+  --sky-high-dep: #5fa3e8;  /* zenith            */
+  --sky-mid-dep: #9ac9f3;   /* upper middle      */
+  --sky-band-dep: #c8e2fa;  /* lower middle      */
+  --sky-low-dep: #dcecfb;   /* horizon glow      */
+
+  /* The zenith stays BLUE — that is what a real sunset does, and it keeps
+     the near-complementary crossing off the widest part of the screen.
+
+     The crossing itself is handled by --sky-mid, which arrives as a PALE
+     WARM CREAM rather than a tan. That is the whole trick: blue and orange
+     are complementary, so a gradient run straight between them passes
+     through a grey-brown, whatever the two endpoints are. Routing it
+     through a light stop keeps the whole path bright, and the mud never
+     forms. It is also what a golden hour actually looks like — a pale band
+     between the blue above and the fire below.
+
+     The last two stops then carry the colour, and have to stay clearly
+     warmer than the cream sun or the disc has nothing to stand against. */
+  --sky-high-arr: #6aa9e0;
+  --sky-mid-arr: #ffe4bd;
+  --sky-band-arr: #ffbe73;
+  --sky-low-arr: #ff9d55;
+
+  --sky-high: color-mix(in oklab, var(--sky-high-dep), var(--sky-high-arr) calc(var(--warmth, 0) * 100%));
+  --sky-mid: color-mix(in oklab, var(--sky-mid-dep), var(--sky-mid-arr) calc(var(--warmth, 0) * 100%));
+  --sky-band: color-mix(in oklab, var(--sky-band-dep), var(--sky-band-arr) calc(var(--warmth, 0) * 100%));
+  --sky-low: color-mix(in oklab, var(--sky-low-dep), var(--sky-low-arr) calc(var(--warmth, 0) * 100%));
+
   --cloud-top: #ffffff;
   --cloud-base: #d3e4f6;
+  --wash: 236, 152, 82; /* the warm light that arrives at the bottom */
   --haze: 216, 236, 252;
 
   position: fixed;
@@ -24,22 +70,61 @@
   z-index: 0;
   overflow: hidden;
   pointer-events: none; /* never intercepts clicks meant for the page */
+  /* "in oklab" matters as much as the extra stop: left to itself the
+     browser blends gradients in sRGB, which sags toward grey across
+     exactly this kind of span. */
   background:
     linear-gradient(
-      to bottom,
+      to bottom in oklab,
       var(--sky-high) 0%,
-      var(--sky-mid) 46%,
+      var(--sky-mid) 42%,
+      var(--sky-band) 72%,
       var(--sky-low) 100%
     );
-  transition: background .6s ease;
+  /* Was .6s, for the theme flip. Shortened because --warmth now moves this
+     gradient while you scroll, and .6s of easing read as the sky lagging
+     behind the page. */
+  transition: background .2s ease;
 }
 
+/* Warm light for the arrival. One composited overlay rather than
+   recolouring the clouds: only its opacity moves, so nothing is ever
+   re-rasterised. Sits above the cloud and star layers. */
+.sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  /* Starts well below the zenith now. Laid over the blue as well, this
+     warm film was itself part of the muddying — the gradient's own stops
+     carry the colour, so the wash only has to lift the clouds nearest the
+     horizon. */
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--wash), 0) 45%,
+    rgba(var(--wash), .12) 80%,
+    rgba(var(--wash), .22) 100%
+  );
+  opacity: var(--warmth, 0);
+}
+
+/* The inverse journey: night thinning out into first light, rather than
+   day falling into dusk. Endpoints only — the mixes above are unchanged. */
 :root[data-theme="dark"] .sky {
-  --sky-high: #071627;
-  --sky-mid: #0e2942;
-  --sky-low: #1c4363;
+  --sky-high-dep: #071627;
+  --sky-mid-dep: #0e2942;
+  --sky-band-dep: #163a5a;
+  --sky-low-dep: #1c4363;
+
+  --sky-high-arr: #2b2b52;  /* dawn — violet overhead, rose at the rim */
+  --sky-mid-arr: #6d5578;
+  --sky-band-arr: #b4778c;
+  --sky-low-arr: #e5a394;
+
   --cloud-top: #b9cfe6;
   --cloud-base: #4d6f92;
+  --wash: 214, 138, 168;
   --haze: 20, 48, 80;
 }
 
@@ -56,11 +141,17 @@
   );
 }
 
-/* Haze at the horizon — pushes far clouds back visually */
+/* Haze at the horizon — pushes far clouds back visually.
+
+   It is a pale BLUE wash, which is right for a blue sky and wrong for a
+   warm one: laid over gold at 68% it desaturates it and reads as a shadow
+   ringing the sun. So it thins out as the journey warms, leaving the
+   horizon its own light at the moment that matters. */
 .sky-haze {
   position: absolute;
   inset: auto 0 0 0;
   height: 55%;
+  opacity: calc(1 - var(--warmth, 0) * 0.85);
   background: linear-gradient(
     to bottom,
     rgba(var(--haze), 0) 0%,

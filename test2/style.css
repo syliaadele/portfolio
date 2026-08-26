@@ -5,9 +5,31 @@
    --------------------------------------------------------------- */
 
 :root {
+  /* --- the journey --------------------------------------------------
+     --t is the scroll position: 0 at the top of the page, 1 at the
+     bottom, written by script.js and by nothing else. The palette it
+     drives lives in sky.css, on .sky, which owns the sky's own colours;
+     these three are only the body backdrop behind that fixed layer. */
+  --t: 0;
+
   --sky-1: #b9d8f2;
   --sky-2: #cfe4f7;
   --sky-3: #a9cdec;
+
+  /* Four stops, because a sphere reads from its limb rather than its
+     middle: a white-hot core, a body, then a warmer and slightly deeper
+     edge right at the rim. --sun-rays is a triplet so the halo and the
+     rays can pick their own alphas from it. */
+  /* Cream, not orange. In the reference the disc is almost white-buttery
+     and only turns golden in the last sliver — the sky carries the warmth,
+     the sun carries the light. Going orange here made it darker than its
+     own sky, which is the one thing a star cannot be. */
+  --sun-hot: #fdf9de;
+  --sun-core: #f9efb8;
+  --sun-edge: #f5de96;
+  --sun-limb: #eec777;
+  --sun-rays: 250, 214, 140;
+
   --warm: 255, 246, 224;
 
   --ink: #000;
@@ -56,6 +78,14 @@
   --sky-1: #0e2136;
   --sky-2: #14304d;
   --sky-3: #0a1929;
+
+  /* a rising sun, not a setting one */
+  --sun-hot: #fff8fa;
+  --sun-core: #ffe2ea;
+  --sun-edge: #e5aac2;
+  --sun-limb: #bd82a4;
+  --sun-rays: 244, 196, 218;
+
   --warm: 120, 165, 225;
 
   --ink: #fff;
@@ -104,7 +134,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* --- column grid ------------------------------------------------ */
 
-.grid { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+/* The grid belongs to the page, not to the sky. It is fixed to the
+   viewport, so its two horizontal rules sat straight across the sunset —
+   and a hairline drawn over a sun reads as a rendering fault, not as
+   structure. Fading it out on --warmth means it is fully there for the
+   whole journey and completely gone on arrival, without deleting it. */
+.grid {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: calc(1 - var(--warmth, 0));
+}
 .gline { position: absolute; top: 0; bottom: 0; width: var(--grid-w); background: var(--grid-line); }
 .hline { position: absolute; left: 0; right: 0; height: var(--grid-w); background: var(--grid-line); }
 .plus {
@@ -441,12 +482,20 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: .85rem calc(100% - var(--c4) + var(--gutter)) .85rem calc(var(--c1) + var(--gutter));
   font-size: .72rem;
   letter-spacing: .05em;
   pointer-events: none;
 }
+
+/* The middle item is centred by giving the two ends equal weight, not by
+   space-between: that equalises the GAPS, so the moment the two ends differ
+   in width — the clock against a 16px globe — the middle sits off centre by
+   half the difference. Also degrades correctly to two items, which is what
+   the work pages have once #coords is hidden. */
+.status > :first-child,
+.status > :last-child { flex: 1 1 0; }
+.status > :last-child { text-align: right; justify-content: flex-end; }
 .globe { display: flex; opacity: .7; }
 
 /* --- content blocks --------------------------------------------- */
@@ -570,9 +619,13 @@ main { position: relative; z-index: 2; }
 /* --- footer ----------------------------------------------------- */
 
 .foot {
+  /* named because the sun cancels it out to reach the true bottom edge —
+     absolute offsets resolve against the padding box, not the border box */
+  --foot-pb: 5.5rem;
+
   position: relative;
   z-index: 2;
-  padding: clamp(4rem, 10vw, 8rem) calc(100% - var(--c4)) 5.5rem var(--c1);
+  padding: clamp(4rem, 10vw, 8rem) calc(100% - var(--c4)) var(--foot-pb) var(--c1);
   border-top: 1px solid var(--line);
 }
 .mega.small { font-size: clamp(1.9rem, 6vw, 5.4rem); }
@@ -591,38 +644,142 @@ main { position: relative; z-index: 2; }
 }
 
 /* The sky opens up behind the section as it comes into view */
-.foot-glow {
+
+/* Centred for the finale, so the headline sits square on the sun. Revert
+   to text-align: left here (and drop the justify-content below) to put the
+   block back on the page's left edge. */
+.foot-inner {
+  position: relative;
+  z-index: 1;
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+.foot-links { justify-content: center; }
+
+/* --- the sun ----------------------------------------------------- */
+/* A dome rather than a disc: a 2:1 box with only its top corners rounded
+   is already a half circle, so nothing needs clipping.
+
+   Anchored to the very bottom of the section — the negative offset undoes
+   the footer's bottom padding — so the horizon is the end of the page and
+   the headline crosses the sun's upper half. Everything that spills past
+   the section is caught by .foot--big's overflow: hidden, which is why the
+   halo and the rays need no clip of their own.
+
+   z-index 0 keeps it below .foot-inner and the colophon (both 1), so the
+   type always stays on top.
+
+   A white .foot-glow used to sit behind this — the old "the sky opens up"
+   effect from before there was a sun. It was a 140vmax radial centred at
+   42% of the section, so it was still around 30% opaque where the
+   section's overflow: hidden cut it off, and that drew a hard horizontal
+   line across the page. Redundant next to a real sun, so it is gone. */
+/* A TRUE CIRCLE, not a squashed dome. The previous version was a 2:1 box
+   with rounded top corners — geometrically a half ellipse, which is
+   exactly why it read as drawn rather than photographed. This is a full
+   circle whose centre sits below the end of the page, so what shows above
+   the edge is a real spherical cap: wide, shallow, and correct.
+
+   --sun-d is the diameter and --sun-cap is how much of it clears the page
+   edge. Those two alone set the curvature: a big diameter with a small cap
+   gives the shallow arc of something enormous and far away. */
+.sun {
+  --sun-d: 170vw;
+  --sun-cap: 340px;
+
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  /* drop the whole disc below the page, then lift the cap back up */
+  bottom: calc(-1 * var(--foot-pb) - (var(--sun-d) - var(--sun-cap)));
+  width: var(--sun-d);
+  height: var(--sun-d);
+  pointer-events: none;
+
+  opacity: 0;
+  translate: -50% 70px;
+  transition:
+    opacity 1.6s var(--ease) .2s,
+    translate 1.8s var(--ease) .2s;
+}
+.foot--big.in .sun { opacity: 1; translate: -50% 0; }
+
+/* The 3D sun. Fills the section; the disc's size and position are computed
+   in sun3d.js from the same numbers the CSS version uses, so the two land
+   in the same place and the swap is invisible.
+
+   .gl is only added once WebGL has actually reported success, which is why
+   the flat sun is hidden by that class rather than by the mere presence of
+   the script — a failed import must not leave the section empty. */
+.sun-gl {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease);
+}
+.foot--big.gl .sun-gl { opacity: 1; }
+.foot--big.gl .sun { display: none; }
+
+/* The shaded disc itself — see the defs in index.html. Sits above the
+   corona (which is a pseudo-element of the wrapper) so the corona never
+   lightens the body. */
+.sun-disc {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* the haze that a low sun is seen through: just enough to take the
+     vector crispness off the limb */
+  filter: blur(.7px);
+}
+
+/* Corona. Concentric with the disc, so it is physically where it belongs —
+   most of it falls below the page and only the part above the arc shows.
+   It starts at the limb (1 / 1.3 of its own radius) so it never lightens
+   the disc itself. */
+.sun::before {
+  content: "";
   position: absolute;
   left: 50%;
-  top: 42%;
-  width: 140vmax;
-  height: 140vmax;
+  top: 50%;
+  width: calc(var(--sun-d) * 1.3);
+  height: calc(var(--sun-d) * 1.3);
   translate: -50% -50%;
-  z-index: -1;
+  border-radius: 50%;
   pointer-events: none;
   background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, .85) 0%,
-    rgba(214, 234, 252, .55) 26%,
-    rgba(160, 200, 240, .18) 48%,
-    transparent 68%
+    circle at 50% 50%,
+    rgba(var(--sun-rays), 0) 76%,
+    rgba(var(--sun-rays), .34) 79%,
+    rgba(var(--sun-rays), .12) 88%,
+    transparent 100%
   );
-  opacity: 0;
-  scale: .55;
-  transition: opacity 1.6s var(--ease), scale 2.2s var(--ease);
 }
-.foot--big.in .foot-glow { opacity: 1; scale: 1; }
 
-:root[data-theme="dark"] .foot-glow {
+/* Lateral flare along the top of the arc — light spreading sideways, the
+   way it does when the sun is low. Replaces the spoked rays, which were
+   the least realistic part of the old version. */
+.sun::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 150%;
+  height: calc(var(--sun-cap) * 2.4);
+  translate: -50% -50%;
+  pointer-events: none;
   background: radial-gradient(
-    circle,
-    rgba(90, 150, 220, .38) 0%,
-    rgba(40, 90, 150, .22) 30%,
-    transparent 66%
+    ellipse 50% 50% at 50% 50%,
+    rgba(var(--sun-rays), .42) 0%,
+    rgba(var(--sun-rays), .16) 42%,
+    transparent 76%
   );
 }
-
-.foot-inner { position: relative; z-index: 1; padding-left: var(--gutter); }
 
 .foot-label {
   display: inline-flex;
@@ -729,8 +886,34 @@ main { position: relative; z-index: 2; }
   .foot-mail { flex-wrap: wrap; gap: .5rem 1rem; border-radius: 28px; }
 }
 
+/* --- short viewports --------------------------------------------- */
+/* The finale is the last thing on the page, so anything taller than the
+   window is not merely tight — it is unreachable. Scrolled to the end you
+   see the LAST screenful, and the headline's first line sits above it.
+   On a 15" laptop the block runs to roughly 1060px against ~890 of height.
+
+   Keyed on height, not width, because that is the actual constraint. The
+   rhythm tightens instead of the type shrinking: ~230px comes back from
+   spacing alone, which is enough, and the headline keeps its scale. */
+@media (max-height: 920px) {
+  .foot--big {
+    --foot-pb: 3rem;
+    padding-top: clamp(2rem, 5vh, 4rem);
+  }
+  /* A height-based ceiling on top of the usual width-based scale. min()
+     takes whichever is smaller, so this only bites on a short window —
+     the very case where the headline runs out of room — and leaves taller
+     screens at exactly the size they had. */
+  .foot--big .foot-title {
+    font-size: min(clamp(2.5rem, 10.5vw, 10rem), 15vh);
+    margin: 1rem 0 1.6rem;
+  }
+  .foot--big .foot-links { margin-top: 1.4rem; }
+  .foot--big .colophon { padding-top: 2rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .foot-glow,
+  /* .foot-glow removed: see the note where the sun is defined */
   .foot-label,
   .fl > span,
   .foot-mail,
@@ -741,6 +924,8 @@ main { position: relative; z-index: 2; }
     transition: none;
   }
   .foot-label .dot { animation: none; }
+  /* its own rule: `translate: 0 0` would undo the -50% that centres it */
+  .sun { opacity: 1; translate: -50% 0; transition: none; }
 }
 
 .mail {
@@ -889,7 +1074,7 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   /* No full-height finale on a phone — it left a screen of dead space
      under the links. The section is now only as tall as its content. */
   .foot--big { min-height: 0; padding-top: clamp(3rem, 12vw, 4.5rem); }
-  .foot { padding-bottom: 2rem; }
+  .foot { --foot-pb: 2rem; }
   .foot--big .colophon { margin-top: 2.5rem; padding-top: 1.5rem; }
   .foot-title { margin-bottom: 1.75rem; }
 

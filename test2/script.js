@@ -98,6 +98,59 @@ setInterval(tick, 10000);
 
 const pad = (n) => String(Math.round(n)).padStart(4, "0");
 
+// ===== The journey — scroll is the time of day =====
+// sky.js only ever answered the cursor; nothing here read the scroll
+// position. This publishes it as --t (0 at the top, 1 at the bottom) and
+// stops there: style.css derives the whole palette from that one number,
+// and each theme supplies its own two endpoints, so light runs midday ->
+// sunset while dark runs night -> dawn off the same value.
+(function journey() {
+  let current = -1;
+  let queued = false;
+
+  /* Raise WARM_FROM to make the sunset arrive even later; set it to 1 and
+     the sky never warms at all, which is the way out if the whole colour
+     journey turns out to be a bad idea. */
+  const WARM_FROM = 0.62;
+  const ease = (t) => {
+    const u = Math.min(1, Math.max(0, (t - WARM_FROM) / (1 - WARM_FROM)));
+    return u * u * (3 - 2 * u); // smoothstep
+  };
+
+  const apply = () => {
+    queued = false;
+    const span = document.documentElement.scrollHeight - window.innerHeight;
+    const raw = span > 0 ? window.scrollY / span : 0;
+    /* Quantised to 100 steps. One percent of the palette is well below
+       what the eye resolves, and it keeps a style recalculation from
+       firing on every pixel of a scroll. */
+    const t = Math.round(Math.min(1, Math.max(0, raw)) * 100) / 100;
+    if (t === current) return;
+    current = t;
+    root.style.setProperty("--t", t);
+
+    /* --warmth is --t held back until the end of the page.
+
+       Blue and orange are near-complementary, so interpolating straight
+       between them crosses a neutral: at t = 0.5 the sky came out a grey
+       beige, and that muddy middle was most of the scroll. Easing the
+       warmth into the last stretch keeps the blue everyone actually likes
+       for the whole journey and turns the sunset into an arrival rather
+       than a long crossfade. */
+    root.style.setProperty("--warmth", ease(t).toFixed(3));
+  };
+
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(apply);
+  };
+
+  apply();
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+})();
+
 // ===== "hello" glass sculpture =====
 // Authored at 1400x600; --k scales it to the viewport so the SVG filter
 // and the clip-path keep sharing one coordinate space.
@@ -721,11 +774,36 @@ if (finale) {
         if (e.isIntersecting) {
           e.target.classList.add("in");
           obs.unobserve(e.target);
+          loadSun(e.target);
         }
       });
     },
     { threshold: 0.25 }
   ).observe(finale);
+}
+
+/* The 3D sun is fetched here rather than up front: Three is ~670kB, and
+   this is the only thing on the site that needs it. A visitor who never
+   reaches the bottom never downloads it.
+
+   The CSS sun renders until this succeeds, and stays if it doesn't — no
+   WebGL, a phone, or reduced motion all keep the flat version rather than
+   losing the sun entirely. The .gl class is what swaps them, so the
+   fallback is never hidden on the strength of an import that might fail. */
+function loadSun(host) {
+  if (window.innerWidth < 900) return;
+  if (!window.matchMedia("(pointer: fine)").matches) return;
+
+  /* Versioned like the stylesheets: this module is imported at runtime, so
+     it is not covered by the ?v= on the script tag that loads this file.
+     three.module.js underneath is pinned and can cache indefinitely. */
+  import("./sun3d.js?v=1787325230")
+    .then((m) => {
+      if (m.mountSun(host)) host.classList.add("gl");
+    })
+    .catch(() => {
+      /* keep the CSS sun */
+    });
 }
 
 const io = new IntersectionObserver(
