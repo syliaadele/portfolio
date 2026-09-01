@@ -1,0 +1,18 @@
+# Sources recuperees depuis le CDN Adobe.
+#
+# _private/ ne doit JAMAIS etre committe : ce sont les visuels sous accord
+# de confidentialite, en clair. Un fichier pousse une fois reste dans
+# l'historique meme apres suppression, ce qui viderait de son sens le
+# chiffrement de la section verrouillee. Seules les versions chiffrees ont
+# vocation a etre versionnees.
+_private/
+
+# Sources publiques : gardees hors du depot le temps de l'optimisation,
+# les versions allegees prendront leur place.
+_source/
+
+# Dependances des outils de build. Le site servi reste statique.
+node_modules/
+
+# Comparaison ponctuelle de qualite, pas du site.
+_compare/
