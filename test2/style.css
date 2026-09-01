@@ -723,7 +723,13 @@ main { position: relative; z-index: 2; }
    gives the shallow arc of something enormous and far away. */
 .sun {
   --sun-d: 170vw;
-  --sun-cap: 340px;
+  /* A RATIO of the diameter, not a pixel count. Held at a flat 340px it
+     broke on a phone: at 375px wide the diameter is 637px, so the radius
+     is 318 — and a 340px "cap" is larger than the radius it is supposed to
+     be a slice of. The result was more than half the disc, a 637px ball
+     over half the screen. 0.185 is the desktop proportion, so nothing
+     changes there. */
+  --sun-cap: calc(var(--sun-d) * 0.185);
 
   position: absolute;
   z-index: 0;
