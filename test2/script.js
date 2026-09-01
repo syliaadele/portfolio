@@ -797,7 +797,7 @@ function loadSun(host) {
   /* Versioned like the stylesheets: this module is imported at runtime, so
      it is not covered by the ?v= on the script tag that loads this file.
      three.module.js underneath is pinned and can cache indefinitely. */
-  import("./sun3d.js?v=1787730589")
+  import("./sun3d.js?v=1788282578")
     .then((m) => {
       if (m.mountSun(host)) host.classList.add("gl");
     })
