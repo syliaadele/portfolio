@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "description": "Outils de build du portfolio. Le site lui-meme reste statique et sans dependance a l'execution : rien d'ici n'est servi au visiteur.",
+  "scripts": {
+    "dev": "bash tools/serve.sh"
+  },
   "devDependencies": {
     "sharp": "^0.35.4"
   }
