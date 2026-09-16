@@ -39,7 +39,22 @@ GRID_ROWS.forEach((top) => {
 const themeBtn = document.getElementById("theme");
 const themeVal = document.getElementById("themeVal");
 
-function setTheme(theme) {
+/* The sky's gradient carries no transition of its own — see the note in
+   sky.css. A full-viewport gradient interpolation is a main-thread
+   repaint, and leaving it armed meant paying for one on every quantum of
+   the scroll journey. The flip is the one jump big enough to need easing,
+   so it arms the transition for its own duration and disarms it after.
+   Kept a shade longer than the .45s in the stylesheet so the class never
+   comes off mid-fade. */
+let themeShiftTimer = 0;
+function easeThemeFlip() {
+  root.classList.add("theme-shift");
+  clearTimeout(themeShiftTimer);
+  themeShiftTimer = setTimeout(() => root.classList.remove("theme-shift"), 550);
+}
+
+function setTheme(theme, animate) {
+  if (animate) easeThemeFlip();
   root.dataset.theme = theme;
   if (themeVal) themeVal.textContent = theme === "dark" ? "D" : "L";
   try {
@@ -53,7 +68,7 @@ try {
 } catch (e) {}
 setTheme(savedTheme || "light");
 themeBtn.addEventListener("click", () =>
-  setTheme(root.dataset.theme === "dark" ? "light" : "dark")
+  setTheme(root.dataset.theme === "dark" ? "light" : "dark", true)
 );
 
 // ===== Language (EN / FR) =====
@@ -188,21 +203,25 @@ function sizeHello() {
 sizeHello();
 window.addEventListener("resize", sizeHello, { passive: true });
 
-/* PHONE PERFORMANCE — one targeted cut, nothing else.
-   The glass keeps its full 24-primitive filter everywhere, so it looks
-   identical on a phone. What goes is the pair of SMIL <animate> tags
-   that slide the gradient: they change the filter's input 60 times a
-   second, which makes the browser re-run the whole chain every frame.
-   Removing them leaves the rendered result byte-for-byte the same in a
-   still image, and lets the browser rasterise it once. */
-function calmHello() {
-  if (window.innerWidth >= 900 && window.matchMedia("(pointer: fine)").matches) {
-    return false;
-  }
-  document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
-  return true;
-}
-const helloIsLite = calmHello();
+/* PERFORMANCE — one targeted cut, nothing else, and on every screen.
+   The glass keeps its full 24-primitive filter, so it looks identical.
+   What goes is the pair of SMIL <animate> tags that slide the gradient:
+   they change the filter's input 60 times a second, which makes the
+   browser re-run the whole chain every frame — on the CPU, since none
+   of feTurbulence, feDisplacementMap or feSpecularLighting is GPU
+   accelerated anywhere. That ran for as long as the page was open, with
+   the cursor nowhere near the word. Desktops were never exempt; they
+   just had the cores to hide it. Removing them leaves the rendered
+   result byte-for-byte the same in a still image, and lets the browser
+   rasterise it once.
+
+   The cursor ripple below is a separate matter: it also re-runs the
+   chain, but only while the pointer is actually moving over the word,
+   and it is the interaction itself. Hence its own flag. */
+document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
+
+const helloHasRipple =
+  window.innerWidth >= 900 && window.matchMedia("(pointer: fine)").matches;
 
 // Hold the reveal until the script font is ready — the filter would
 // otherwise light a fallback serif for a frame, and the measurement
@@ -217,6 +236,35 @@ if (document.fonts && document.fonts.load) {
   document.fonts.load('300px "Pacifico"').then(showHello).catch(showHello);
 } else {
   showHello();
+}
+
+/* PERFORMANCE — put the glass to sleep once it scrolls away.
+
+   The refraction pass is the single most expensive thing on the page: a
+   backdrop-filter clipped by clip-path:url(), nested inside a wrapper
+   whose 19s drift never stops. The SVG clip keeps it off the compositor,
+   and the ceaseless drift moves the sampled region, so the backdrop was
+   being re-blurred every frame for the entire life of the tab — while
+   reading the work list, while scrolling the finale, always.
+
+   The hero is one screen tall. Past it there is nothing to refract and
+   nobody looking, so .hello--rest turns the pass off and parks the two
+   idle animations (see the note in style.css). Coming back up restores
+   all three; the drift resumes from its own phase rather than restarting,
+   so the word is never caught jumping.
+
+   The margin is not a comfort setting. .hello-svg carries overflow:visible
+   and #hGlass is declared y="-32%" height="176%", so the halo paints some
+   140px beyond the box the observer measures. Standing down on the box
+   alone would cut that halo off while it was still on screen — the word
+   would visibly clip at the top of the viewport. 200px clears it with
+   room to spare, at the cost of holding the effect for one fifth of a
+   screen longer than strictly necessary. */
+if ("IntersectionObserver" in window && hello) {
+  new IntersectionObserver(
+    ([entry]) => hello.classList.toggle("hello--rest", !entry.isIntersecting),
+    { threshold: 0, rootMargin: "200px" }
+  ).observe(hello);
 }
 
 // Cursor parallax + perspective shift, eased toward the pointer.
@@ -245,8 +293,14 @@ if (!calmMotion.matches) {
     requestAnimationFrame(paint);
   };
 
+  /* Asleep means asleep. Without this the cursor still drove the tilt
+     while the word was pages away — every mousemove restarting a loop
+     that transforms a 30-primitive filtered layer nobody can see, on the
+     one thread the scroll also needs. Parking the loop leaves the word
+     wherever it was; the pointer re-enters the hero having already moved
+     on, and the ease glides it across rather than snapping. */
   const runHello = () => {
-    if (helloRunning) return;
+    if (helloRunning || hello.classList.contains("hello--rest")) return;
     helloRunning = true;
     requestAnimationFrame(paint);
   };
@@ -286,7 +340,7 @@ if (!calmMotion.matches) {
   if (!svg || !warpGroup || !rippleImg || !warpMap) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   /* another whole-filter recompute per frame — desktop pointers only */
-  if (helloIsLite || !window.matchMedia("(pointer: fine)").matches) return;
+  if (!helloHasRipple) return;
 
   const VIEW = { w: 960, h: 420 }; // artboard units
   const R = {
@@ -445,6 +499,14 @@ if (!calmMotion.matches) {
   window.addEventListener(
     "mousemove",
     (e) => {
+      /* Cheap test first, and deliberately before the rect below.
+         getBoundingClientRect() flushes pending layout, and this runs on
+         every mousemove — far more often than the screen refreshes — so
+         off the hero it was forcing a layout per event to work out the
+         position of a word that is not on screen. A class lookup answers
+         that for nothing. */
+      if (hello.classList.contains("hello--rest")) return;
+
       const box = svg.getBoundingClientRect();
       if (!box.width) return;
 
@@ -635,6 +697,14 @@ if (!calmMotion.matches) {
   window.addEventListener(
     "mousemove",
     (e) => {
+      /* The one piece of gating this DOES take (see the note above about
+         not inheriting the distortion loop's). It is not a capability
+         test but a visibility one, and it changes no behaviour: off the
+         hero the pointer cannot be over the letterforms, so the bounds
+         test below was already rejecting every move — just after paying
+         for a forced layout to do it. */
+      if (hello.classList.contains("hello--rest")) return;
+
       const box = svg.getBoundingClientRect();
       if (!box.width) return;
 
@@ -742,18 +812,33 @@ if (fine) {
     y = 0,
     frame = null;
 
+  /* The readout is written HERE rather than in the listener. A mousemove
+     fires far more often than the screen refreshes, and textContent on a
+     node in the top bar dirties that subtree every time — so a fast sweep
+     was paying for several style recalculations per painted frame, all
+     but one of them for a number never shown. Folded into the rAF that
+     was already moving the cursor, it costs one per frame, like the
+     translate beside it.
+
+     The listener is passive for the same reason it is elsewhere on the
+     page: it never calls preventDefault, and saying so lets the browser
+     stop waiting on it before it scrolls. */
   const draw = () => {
     cursor.style.translate = `${x}px ${y}px`;
+    coords.textContent = `${pad(x)} X ${pad(y)} Y`;
     frame = null;
   };
 
-  window.addEventListener("mousemove", (e) => {
-    x = e.clientX;
-    y = e.clientY;
-    coords.textContent = `${pad(e.clientX)} X ${pad(e.clientY)} Y`;
-    cursor.classList.add("on");
-    if (!frame) frame = requestAnimationFrame(draw);
-  });
+  window.addEventListener(
+    "mousemove",
+    (e) => {
+      x = e.clientX;
+      y = e.clientY;
+      cursor.classList.add("on");
+      if (!frame) frame = requestAnimationFrame(draw);
+    },
+    { passive: true }
+  );
 
   window.addEventListener("mousedown", () => cursor.classList.add("tap"));
   window.addEventListener("mouseup", () => cursor.classList.remove("tap"));
