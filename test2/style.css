@@ -86,10 +86,6 @@
   --r2: 68%;
   --gutter: 20px;
 
-  /* The rules are decoration, not structure: far fainter and thinner
-     than the UI borders, which keep using --line. */
-  --grid-line: rgba(0, 0, 0, .055);
-  --grid-w: .5px;
 }
 
 :root[data-theme="dark"] {
@@ -114,7 +110,6 @@
   --ink-2: rgba(var(--ink-rgb), .66);
   --ink-3: rgba(var(--ink-rgb), .36);
   --line: rgba(255, 255, 255, .14);
-  --grid-line: rgba(255, 255, 255, .065);
   --panel: rgba(255, 255, 255, .06);
   --pill: rgba(255, 255, 255, .15);
   --pill-line: rgba(255, 255, 255, .26);
@@ -153,32 +148,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 ::selection { background: #c0fe04; color: #000; }
 
 /* Sky background lives in sky.css / sky.js */
-
-/* --- column grid ------------------------------------------------ */
-
-/* The grid belongs to the page, not to the sky. It is fixed to the
-   viewport, so its two horizontal rules sat straight across the sunset —
-   and a hairline drawn over a sun reads as a rendering fault, not as
-   structure. Fading it out on --warmth means it is fully there for the
-   whole journey and completely gone on arrival, without deleting it. */
-.grid {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: calc(1 - var(--warmth, 0));
-}
-.gline { position: absolute; top: 0; bottom: 0; width: var(--grid-w); background: var(--grid-line); }
-.hline { position: absolute; left: 0; right: 0; height: var(--grid-w); background: var(--grid-line); }
-.plus {
-  position: absolute;
-  left: 50%;
-  translate: -50% -50%;
-  font-family: var(--mono);
-  font-size: .8rem;
-  line-height: 1;
-  color: var(--grid-line);
-}
 
 /* --- top bar ---------------------------------------------------- */
 

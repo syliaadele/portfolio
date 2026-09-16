@@ -12,8 +12,8 @@
 
   <!-- Shared art direction. These live in test2/ while the new site is
        still being built there; when it moves to the root, so do they. -->
-  <link rel="stylesheet" href="test2/sky.css?v=1789570734" />
-  <link rel="stylesheet" href="test2/style.css?v=1789570734" />
+  <link rel="stylesheet" href="test2/sky.css?v=1789572083" />
+  <link rel="stylesheet" href="test2/style.css?v=1789572083" />
 
   <style>
     /* Page-specific layout only — everything else comes from style.css */
@@ -202,7 +202,6 @@
 <body>
   <!-- Interactive sky (built by sky.js) -->
   <div class="sky" id="sky" aria-hidden="true"></div>
-  <div class="grid" id="grid" aria-hidden="true"></div>
 
   <header class="top">
     <span class="wordmark">SYLIA.ADÈLE</span>
@@ -347,48 +346,15 @@
     </svg>
   </div>
 
-  <script src="test2/sky.js?v=1789570734"></script>
-  <script src="test2/nav.js?v=1789570734"></script>
-  <script src="test2/sound.js?v=1789570734"></script>
-  <script src="test2/hello-raster.js?v=1789570734"></script>
+  <script src="test2/sky.js?v=1789572083"></script>
+  <script src="test2/nav.js?v=1789572083"></script>
+  <script src="test2/sound.js?v=1789572083"></script>
+  <script src="test2/hello-raster.js?v=1789572083"></script>
   <script>
     (function () {
       const root = document.documentElement;
 
       document.getElementById("year").textContent = new Date().getFullYear();
-
-      // Column grid with crosshairs
-      // Same construction as test2/script.js: the positions are read back
-      // from the CSS custom properties in style.css instead of being
-      // duplicated here, so this page's rules land exactly where the new
-      // site's do — including the two horizontal ones.
-      const gridPos = (names) => {
-        const cs = getComputedStyle(root);
-        return names.map((n) => cs.getPropertyValue(n).trim()).filter(Boolean);
-      };
-
-      const grid = document.getElementById("grid");
-      const GRID_COLS = gridPos(["--c1", "--c2", "--c3", "--c4"]);
-      const GRID_ROWS = gridPos(["--r1", "--r2"]);
-      GRID_COLS.forEach((left) => {
-        const line = document.createElement("div");
-        line.className = "gline";
-        line.style.left = left;
-        GRID_ROWS.forEach((top) => {
-          const plus = document.createElement("span");
-          plus.className = "plus";
-          plus.style.top = top;
-          plus.textContent = "+";
-          line.appendChild(plus);
-        });
-        grid.appendChild(line);
-      });
-      GRID_ROWS.forEach((top) => {
-        const line = document.createElement("div");
-        line.className = "hline";
-        line.style.top = top;
-        grid.appendChild(line);
-      });
 
       // Theme
       // The sky gradient carries no transition of its own any more — a

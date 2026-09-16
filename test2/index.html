@@ -9,16 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Pacifico&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="sky.css?v=1789570734" />
-  <link rel="stylesheet" href="style.css?v=1789570734" />
-  <link rel="stylesheet" href="work.css?v=1789570734" />
+  <link rel="stylesheet" href="sky.css?v=1789572083" />
+  <link rel="stylesheet" href="style.css?v=1789572083" />
+  <link rel="stylesheet" href="work.css?v=1789572083" />
 </head>
 <body>
   <!-- Interactive sky background (built by sky.js) -->
   <div class="sky" id="sky" aria-hidden="true"></div>
 
-  <!-- Column grid with crosshairs -->
-  <div class="grid" id="grid" aria-hidden="true"></div>
 
   <!-- Top bar -->
   <header class="top">
@@ -494,17 +492,17 @@
     </svg>
   </div>
 
-  <script src="sky.js?v=1789570734"></script>
-  <script src="nav.js?v=1789570734"></script>
-  <script src="sound.js?v=1789570734"></script>
-  <script src="script.js?v=1789570734"></script>
-  <script src="hello-raster.js?v=1789570734"></script>
+  <script src="sky.js?v=1789572083"></script>
+  <script src="nav.js?v=1789572083"></script>
+  <script src="sound.js?v=1789572083"></script>
+  <script src="script.js?v=1789572083"></script>
+  <script src="hello-raster.js?v=1789572083"></script>
 
   <!-- Le verre en WebGL. Chargé en module et en dernier : si l'import ou
        le contexte échoue, mountGlass rend null, la classe n'est jamais
        posée et le "hello" SVG reste tel quel. -->
   <script type="module">
-    import { mountGlass } from "./hello-glass.js?v=1789570734";
+    import { mountGlass } from "./hello-glass.js?v=1789572083";
     const hello = document.getElementById("hello");
     const go = () => {
       try {
