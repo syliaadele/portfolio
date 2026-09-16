@@ -45,7 +45,23 @@ if (grid) {
 
 // ===== Theme =====
 const themeBtn = document.getElementById("theme");
-function setTheme(theme) {
+
+/* The sky's gradient no longer carries a transition of its own — it was a
+   full-viewport repaint left permanently armed for the sake of one flip
+   (see the note in sky.css). These pages do not run the scroll journey,
+   so the flip is the only thing that ever moves that gradient here, but
+   the stylesheet is shared and so is the way back in: arm the transition
+   for the length of the fade, then take it off. */
+let themeShiftTimer = 0;
+function setTheme(theme, animate) {
+  if (animate) {
+    root.classList.add("theme-shift");
+    clearTimeout(themeShiftTimer);
+    themeShiftTimer = setTimeout(
+      () => root.classList.remove("theme-shift"),
+      550
+    );
+  }
   root.dataset.theme = theme;
   try {
     localStorage.setItem("theme", theme);
@@ -58,7 +74,7 @@ try {
 setTheme(savedTheme || "light");
 if (themeBtn) {
   themeBtn.addEventListener("click", () =>
-    setTheme(root.dataset.theme === "dark" ? "light" : "dark")
+    setTheme(root.dataset.theme === "dark" ? "light" : "dark", true)
   );
 }
 

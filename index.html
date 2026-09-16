@@ -12,8 +12,8 @@
 
   <!-- Shared art direction. These live in test2/ while the new site is
        still being built there; when it moves to the root, so do they. -->
-  <link rel="stylesheet" href="test2/sky.css?v=1788282578" />
-  <link rel="stylesheet" href="test2/style.css?v=1788282578" />
+  <link rel="stylesheet" href="test2/sky.css?v=1789569376" />
+  <link rel="stylesheet" href="test2/style.css?v=1789569376" />
 
   <style>
     /* Page-specific layout only — everything else comes from style.css */
@@ -292,6 +292,10 @@
                   stroke-linejoin="round" stroke-linecap="round" paint-order="stroke"
                   filter="url(#hGlass)">hello</text>
           </svg>
+
+          <!-- The colour drift that used to live inside #hGrad. On top of
+               the artwork now, not feeding it — see .hello-sheen. -->
+          <div class="hello-sheen" aria-hidden="true"><i></i></div>
         </div>
       </div>
     </div>
@@ -343,10 +347,10 @@
     </svg>
   </div>
 
-  <script src="test2/sky.js?v=1788282578"></script>
-  <script src="test2/nav.js?v=1788282578"></script>
-  <script src="test2/sound.js?v=1788282578"></script>
-  <script src="test2/hello-raster.js?v=1788282578"></script>
+  <script src="test2/sky.js?v=1789569376"></script>
+  <script src="test2/nav.js?v=1789569376"></script>
+  <script src="test2/sound.js?v=1789569376"></script>
+  <script src="test2/hello-raster.js?v=1789569376"></script>
   <script>
     (function () {
       const root = document.documentElement;
@@ -387,8 +391,20 @@
       });
 
       // Theme
+      // The sky gradient carries no transition of its own any more — a
+      // full-viewport repaint is too expensive to leave permanently armed
+      // (see sky.css). It is armed here for the length of the flip, which
+      // is the only thing on this page that moves that gradient.
       const themeBtn = document.getElementById("theme");
-      const setTheme = (t) => {
+      let themeShiftTimer = 0;
+      const setTheme = (t, animate) => {
+        if (animate) {
+          root.classList.add("theme-shift");
+          clearTimeout(themeShiftTimer);
+          themeShiftTimer = setTimeout(
+            () => root.classList.remove("theme-shift"), 550
+          );
+        }
         root.dataset.theme = t;
         try { localStorage.setItem("theme", t); } catch (e) {}
       };
@@ -396,7 +412,7 @@
       try { saved = localStorage.getItem("theme"); } catch (e) {}
       setTheme(saved || "light");
       themeBtn.addEventListener("click", () =>
-        setTheme(root.dataset.theme === "dark" ? "light" : "dark")
+        setTheme(root.dataset.theme === "dark" ? "light" : "dark", true)
       );
 
       // Paris clock
@@ -418,12 +434,18 @@
       const helloWord = document.getElementById("helloWord");
       const helloTilt = document.getElementById("helloTilt");
 
+      /* Measured once and kept: hello-raster.js swaps the SVG out for a
+         bitmap, and getBBox on the detached <text> would then hand back
+         nothing — so a later resize would silently fall back to the 960
+         artboard width and resize the wordmark. */
+      let helloInk = 0;
+
       function sizeHello() {
-        let w = 960;
         try {
           const b = helloWord.getBBox();
-          if (b && b.width > 10) w = b.width + 20;
+          if (b && b.width > 10) helloInk = b.width + 20;
         } catch (e) {}
+        const w = helloInk || 960;
         /* bigger share of a phone screen, or it barely registers */
         const fill = window.innerWidth < 700 ? 0.86 : 0.52;
         /* Size knob for this page: 1 = the original size, lower = smaller.
@@ -439,17 +461,15 @@
       sizeHello();
       window.addEventListener("resize", sizeHello, { passive: true });
 
-      /* The glass keeps its full filter on every screen. Only the two
-         SMIL gradient animations are dropped on phones: they changed
-         the filter's input every frame, forcing the whole 24-primitive
-         chain to re-run. The still image is unchanged. */
-      const lite =
-        window.innerWidth < 900 ||
-        !window.matchMedia("(pointer: fine)").matches;
-
-      if (lite) {
-        document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
-      }
+      /* The glass keeps its full filter. What goes, on EVERY screen, is
+         the pair of SMIL <animate> tags that slide the gradient: they
+         change the filter's input 60 times a second, so the browser
+         re-runs all 24 primitives every frame — on the CPU, since none
+         of feTurbulence, feDisplacementMap or feSpecularLighting is
+         GPU-accelerated anywhere. Desktops were not spared that; they
+         just had enough cores to hide it until they didn't.
+         In a still frame the rendered result is unchanged. */
+      document.querySelectorAll("#hGrad animate").forEach((a) => a.remove());
 
       const reveal = () =>
         requestAnimationFrame(() => {

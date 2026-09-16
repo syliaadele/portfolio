@@ -81,11 +81,27 @@
       var(--sky-band) 72%,
       var(--sky-low) 100%
     );
-  /* Was .6s, for the theme flip. Shortened because --warmth now moves this
-     gradient while you scroll, and .6s of easing read as the sky lagging
-     behind the page. */
-  transition: background .2s ease;
+  /* NO transition here, on purpose.
+
+     This was `transition: background .2s ease`, put in for the theme flip
+     and then inherited by the scroll journey. A transition on `background`
+     cannot be composited: the browser interpolates a four-stop oklab
+     gradient and repaints the WHOLE viewport for every frame of it. Since
+     --warmth steps on every scroll quantum, each step relaunched a 200ms
+     transition, so that full-viewport repaint ran continuously for the
+     length of the scroll. That was the scroll jank.
+
+     Without it the sky still moves — it just snaps to each of the hundred
+     quanta instead of easing between them, which is one percent of the
+     palette and below what the eye resolves.
+
+     The theme flip is the one case that genuinely needs easing, because it
+     is a single large jump rather than a hundred small ones. setTheme()
+     adds .theme-shift for the length of the fade and takes it off again,
+     so the transition exists only while a flip is actually happening. */
 }
+
+:root.theme-shift .sky { transition: background .45s ease; }
 
 /* Warm light for the arrival. One composited overlay rather than
    recolouring the clouds: only its opacity moves, so nothing is ever
@@ -195,6 +211,11 @@
   from { opacity: var(--o0); }
   to   { opacity: var(--o1); }
 }
+
+/* Under the light theme the whole star layer is opacity 0, but the 130
+   twinkles kept ticking behind it — animation on an invisible subtree is
+   not reliably skipped. Nothing to see, so nothing to animate. */
+:root:not([data-theme="dark"]) .star { animation: none; }
 
 /* Fewer clouds at night — these ones sit the dark theme out */
 :root[data-theme="dark"] .cloud--day { display: none; }
