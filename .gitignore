@@ -16,3 +16,14 @@ node_modules/
 
 # Comparaison ponctuelle de qualite, pas du site.
 _compare/
+
+# Banc de reglage du verre WebGL : une page a curseurs qui sert a trouver
+# les valeurs du shader, pas a etre servie. Gardee en local parce qu'elle
+# reste utile pour regler, hors du depot parce que GitHub Pages sert tout
+# ce qui y est pousse et qu'elle n'a rien a faire sur syliaadele.com.
+#
+# Attention : son shader est une PHOTOGRAPHIE d'un etat anterieur, pas le
+# module livre. test2/hello-glass.js a beaucoup evolue depuis (irisation
+# sur tout le corps, alpha au Fresnel, reglage de nuit). Pour regler le
+# rendu reel, c'est le module qu'il faut toucher.
+test2/lab/
