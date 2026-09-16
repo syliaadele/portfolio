@@ -349,8 +349,12 @@
           c.vy *= 0.5;
         }
 
-        /* still moving, or still displaced? then keep the loop alive */
-        if (off > 0.5 || Math.abs(c.vx) > 0.02 || Math.abs(c.vy) > 0.02) {
+        /* Still MOVING? then keep the loop alive. Deliberately not
+           "still displaced": a cursor parked next to a cloud holds it
+           at an equilibrium where the shove and the spring cancel, so
+           it never returns home and the loop never stopped — burning a
+           frame every 16ms to redraw a scene that had stopped changing. */
+        if (Math.abs(c.vx) > 0.02 || Math.abs(c.vy) > 0.02) {
           settled = false;
         }
 
@@ -362,8 +366,10 @@
     /* Fade the remembered pointer speed while nothing new comes in */
     speed *= 0.9;
 
-    /* Park the loop once everything has come to rest. */
-    if (settled && near(ex) && near(ey) && mouseX < -9998) {
+    /* Park the loop once everything has come to rest. The pointer does
+       not have to have left the page — a stationary pointer generates no
+       new forces, and onMove() restarts the loop the moment it moves. */
+    if (settled) {
       running = false;
       return;
     }
