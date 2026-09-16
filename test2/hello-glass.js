@@ -186,7 +186,12 @@ const GLASS_FRAG = `
      comprimée dans une bande étroite près du bord. Au-delà, plateau : le
      ciel se voit droit au travers, comme par une vitre. */
   float prof(float x) {
-    return smoothstep(0.42, 0.76, x) * 0.80 + smoothstep(0.0, 1.0, x) * 0.20;
+    /* Bande élargie depuis que le champ est redécoupé par la lettre.
+       La découpe fait tomber le champ à zéro sur tous les bords, donc la
+       plage 0.42..0.76 ne couvrait plus que quelques pixels : tout le
+       Fresnel et toute l'irisation s'y entassaient et le biseau se
+       lisait comme un ruban arc-en-ciel au lieu d'une arête de verre. */
+    return smoothstep(0.26, 0.88, x) * 0.80 + smoothstep(0.0, 1.0, x) * 0.20;
   }
   /* Le même champ lu plus profond : l'arête opposée, vue à travers
      l'épaisseur. Une seule arête donne un galet, deux donnent du volume.
@@ -229,8 +234,12 @@ const GLASS_FRAG = `
     float sD = field(wuv - vec2(0.0, e.y)) + dith;
     float hc = field(wuv) + dith;
 
-    vec3 N = normalize(vec3(-(prof(sR) - prof(sL)) * 9.0 * uThick,
-                            -(prof(sU) - prof(sD)) * 9.0 * uThick, 1.0));
+    /* Amplification abaissée de 9 à 6.5 : la découpe du champ par la
+       lettre a raidi toutes les pentes, bord extérieur compris. À
+       l'ancienne valeur les normales saturaient et l'arête partait en
+       dents de scie. */
+    vec3 N = normalize(vec3(-(prof(sR) - prof(sL)) * 6.5 * uThick,
+                            -(prof(sU) - prof(sD)) * 6.5 * uThick, 1.0));
     N = normalize(vec3(N.xy + normalize(dv + 1e-5) * ring * 1.25 * uHover, N.z));
 
     vec3 Nin = normalize(vec3(-(profIn(sR) - profIn(sL)) * 7.0 * uThick,
@@ -314,7 +323,7 @@ const GLASS_FRAG = `
     float pdith = (fract(sin(dot(gl_FragCoord.yx, vec2(39.3468, 11.135)))
                    * 24634.6345) - 0.5) * 0.020;
     vec3 iridAll = iridescence(clamp(N.z, 0.0, 1.0),
-                               0.30 + prof(hc) * 1.5 + pdith + g * 1.4 * uHover);
+                               0.30 + prof(hc) * 0.95 + pdith + g * 1.4 * uHover);
     glass = mix(glass, glass * 0.62 + iridAll * 0.72,
                 clamp(uIrid * (0.26 + 0.74 * F), 0.0, 1.0));
     glass *= 1.0 - smoothstep(0.15, 0.75, F) * 0.16;
@@ -441,7 +450,7 @@ export function mountGlass(hello, word) {
     uMouse: { value: new THREE.Vector2(0.5, 0.58) },
     uPoint: { value: new THREE.Vector2(0.5, 0.5) },
     uThick: { value: 0.62 }, uRefract: { value: 0.82 }, uDisp: { value: 0.40 },
-    uIrid: { value: 0.78 }, uRefl: { value: 0.70 }, uHover: { value: 0.70 },
+    uIrid: { value: 0.66 }, uRefl: { value: 0.70 }, uHover: { value: 0.70 },
     uPower: { value: 0 }, uAspect: { value: 1 },
     /* Part du ciel RÉEL laissée visible à travers le corps plat. */
     uClear: { value: 0.52 }, uDark: { value: 0 },
@@ -522,7 +531,38 @@ export function mountGlass(hello, word) {
     ctx.clearRect(0, 0, W, H);
     ctx.fillText(word, W / 2, H / 2 + DROP_PX * DPR);
 
-    paint(field.getContext("2d"), FW, FH, FW / W);
+    const fx = field.getContext("2d");
+    paint(fx, FW, FH, FW / W);
+
+    /* LE CHAMP EST REDÉCOUPÉ PAR LA LETTRE, et c'est ce qui rend leur
+       dessin aux boucles.
+
+       Un flou gaussien ne connaît pas les contrepoinçons : dans le "e",
+       le "o", les boucles des "l", le flou des traits qui se font face se
+       rejoint et REMPLIT le trou. Le champ y voyait une masse pleine,
+       donc aucune pente ne s'y formait — pas de biseau sur les bords
+       intérieurs, et la boucle se lisait comme un aplat.
+
+       La silhouette n'était pas en cause : le masque est net et on
+       découpe dessus. C'était l'ombrage.
+
+       destination-in multiplie l'alpha déjà en place par celui qu'on
+       dessine : en repassant la lettre à peine floutée, le champ tombe à
+       zéro partout où il n'y a pas de matière, trous compris. Les pentes
+       se reforment donc sur TOUS les bords, intérieurs comme extérieurs.
+       Fait une fois à la construction, gratuit au rendu.
+
+       Le flou de la découpe est petit mais non nul : à zéro, le bord du
+       champ épouserait l'escalier du masque et la normale y partirait en
+       dents de scie. */
+    fx.globalCompositeOperation = "destination-in";
+    fx.filter = "blur(" + Math.max(2, size * 0.034 * (FW / W)) + "px)";
+    fx.fillStyle = "#fff";
+    fx.textAlign = "center"; fx.textBaseline = "middle";
+    fx.font = (size * (FW / W)) + "px Pacifico, cursive";
+    fx.fillText(word, FW / 2, FH / 2 + DROP_PX * DPR * (FW / W));
+    fx.filter = "none";
+    fx.globalCompositeOperation = "source-over";
 
     if (maskTex) { maskTex.dispose(); fieldTex.dispose(); }
     maskTex = new THREE.CanvasTexture(mask);
