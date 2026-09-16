@@ -454,6 +454,104 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   backdrop-filter: blur(3px) saturate(1.4) brightness(1.03);
 }
 
+/* PERFORMANCE — the word costs nothing once it is off screen.
+
+   This pass is the most expensive thing on the page, and none of that is
+   the filter: it is the pairing of backdrop-filter with clip-path:url().
+   An SVG clip is not a compositor clip, so the blur cannot be handed to
+   the GPU and runs on the main thread. Worse, it sits inside .hello-drift,
+   whose 19s animation never ends — the sampled region therefore moves on
+   every frame, so the backdrop was re-blurred and re-clipped sixty times
+   a second for as long as the tab was open, cursor or no cursor, scroll
+   or no scroll.
+
+   Nothing here changes what the word looks like. The hero is a single
+   screen at the top of the page; for the whole of the rest of the scroll
+   the glass is out of view and its cost was being paid for nothing.
+   script.js puts .hello--rest on once the hero leaves the viewport and
+   takes it off when it comes back.
+
+   The drift is paused rather than removed: animation-play-state resumes
+   from where it stopped, so scrolling back up finds the word mid-float
+   exactly where it would have been, with no jump. */
+.hello--rest .hello-refract { display: none; }
+.hello--rest .hello-drift { animation-play-state: paused; }
+.hello--rest .hello-sheen i { animation-play-state: paused; }
+
+/* And the glass itself. On desktop the live 24-primitive chain stays
+   mounted — the bake is not faithful enough to stand in for it, see
+   hello-raster.js — so it is the most expensive thing on the page, and
+   .hello-drift kept it re-rasterising on the CPU while the visitor was
+   pages below reading the work list.
+
+   Taking it out of the render tree while the word is off screen changes
+   nothing anyone can see: .hello--rest is only set once no part of the
+   hero is in view. The hero still pays full price while you are looking
+   at it, which is the honest place for that cost to sit. */
+.hello--rest .hello-svg { display: none; }
+
+/* The slow colour drift across the letters.
+
+   This used to be two SMIL <animate> tags sliding #hGrad — the gradient
+   that FILLS the text, i.e. the filter's own input. Moving it meant the
+   browser re-ran all 24 primitives every frame, on the CPU, forever.
+
+   Same five stops and the same direction, but painted on top of the
+   finished artwork instead of feeding it. Nothing below is invalidated,
+   so the whole effect costs one composited transform per frame.
+
+   The travel lives on the inner <i> and the clip on the wrapper: that
+   way the clip-path is applied to the layer once, and only a transform
+   changes. Animating the gradient's own background-position instead
+   would repaint — and re-clip — the element on every frame. */
+.hello-sheen {
+  position: absolute;
+  inset: 0;
+  clip-path: url(#helloClipCore);
+  overflow: hidden;
+  /* Modulates the light already in the glass rather than covering it,
+     so the specular highlights and the contour survive underneath. */
+  mix-blend-mode: soft-light;
+  /* Calibrated against the artwork, not picked by eye: at .7 the blend
+     turned the clear glass into blue plastic and buried the specular
+     highlights. The body of the glass is only 20% alpha to begin with
+     (feComponentTransfer, slope .2), so the gradient it used to slide
+     was always a faint modulation — this matches that register. It is
+     meant to be almost invisible in a still and legible only as slow
+     movement. */
+  opacity: .18;
+  pointer-events: none;
+}
+
+.hello-sheen i {
+  position: absolute;
+  /* wider than the box on both sides, so the travel never walks an edge
+     of the gradient into view */
+  inset: 0 -45%;
+  display: block;
+  background: linear-gradient(
+    105deg,
+    #9fc9f2 0%,
+    #5f9ade 22%,
+    #8dbdee 44%,
+    #4f88d6 66%,
+    #87b8ec 88%,
+    #9fc9f2 100%
+  );
+  /* 16s, matching the cycle the SMIL pair used to run */
+  animation: hello-sheen 16s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes hello-sheen {
+  from { transform: translate3d(-14%, 0, 0); }
+  to   { transform: translate3d(14%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hello-sheen i { animation: none; }
+}
+
 /* The hue shift lives inside the #hWarp filter, not here: a CSS
    hue-rotate cannot be confined to the cursor. See index.html. */
 .hello-svg {
@@ -463,6 +561,37 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   height: 100%;
   overflow: visible;
 }
+
+/* Le rendu WebGL du verre. Il se superpose exactement à la boîte du
+   mot — pas au viewport : c'était le premier des deux leviers de
+   performance, un prototype plein écran mesurant 22 fps là où la boîte
+   du mot ne pèse qu'une fraction des pixels du héros.
+
+   Le shader fait discard hors des lettres, donc le ciel CSS et les
+   nuages continuent de passer au travers partout ailleurs. */
+.hello-gl {
+  position: absolute;
+  /* PAD_X / PAD_Y de hello-glass.js, en négatif. Le canvas déborde la
+     boîte du mot parce que le SVG qu'il remplace portait overflow:visible :
+     à ras, les lettres et le halo se faisaient couper. Ces quatre valeurs
+     et les deux du module sont un seul jeu — changer l'un sans l'autre
+     décale le mot dans sa boîte. */
+  left: -10%;
+  top: -22%;
+  width: 120%;
+  height: 144%;
+  pointer-events: none;
+}
+
+/* Quand le verre GPU a pris la main, tout le chemin SVG s'efface :
+   l'artwork filtré, la réfraction en backdrop-filter et le sheen. C'est
+   exactement ce que remplace le canvas, et les trois réunis étaient le
+   coût dominant de la page. La classe n'est posée qu'après un montage
+   réussi, donc un navigateur sans WebGL2 garde le rendu SVG intact. */
+.hello--gl .hello-svg,
+.hello--gl .hello-raster,
+.hello--gl .hello-refract,
+.hello--gl .hello-sheen { display: none; }
 
 /* the baked bitmap that replaces it on phones */
 .hello-raster {
@@ -1034,6 +1163,9 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   /* backdrop-filter over a large area is the expensive part — drop the
      refraction pass on small screens and keep the lit glass */
   .hello-refract { display: none; }
+  /* phones never had the sliding gradient in the first place — a blend
+     mode over a clip-path is not the place to start */
+  .hello-sheen { display: none; }
   /* fewer compositor layers = less memory pressure on mobile GPUs */
   .cloud, .cloud-i, .sky-layer { will-change: auto; }
   .top-nav { gap: 1rem; font-size: .7rem; }

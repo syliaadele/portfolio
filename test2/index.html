@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Pacifico&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="sky.css?v=1788282578" />
-  <link rel="stylesheet" href="style.css?v=1788282578" />
-  <link rel="stylesheet" href="work.css?v=1788282578" />
+  <link rel="stylesheet" href="sky.css?v=1789569376" />
+  <link rel="stylesheet" href="style.css?v=1789569376" />
+  <link rel="stylesheet" href="work.css?v=1789569376" />
 </head>
 <body>
   <!-- Interactive sky background (built by sky.js) -->
@@ -206,6 +206,10 @@
                       filter="url(#hGlass)">hello</text>
               </g>
             </svg>
+
+            <!-- The colour drift that used to live inside #hGrad. On top of
+                 the artwork now, not feeding it — see .hello-sheen. -->
+            <div class="hello-sheen" aria-hidden="true"><i></i></div>
           </div>
         </div>
       </div>
@@ -490,10 +494,32 @@
     </svg>
   </div>
 
-  <script src="sky.js?v=1788282578"></script>
-  <script src="nav.js?v=1788282578"></script>
-  <script src="sound.js?v=1788282578"></script>
-  <script src="script.js?v=1788282578"></script>
-  <script src="hello-raster.js?v=1788282578"></script>
+  <script src="sky.js?v=1789569376"></script>
+  <script src="nav.js?v=1789569376"></script>
+  <script src="sound.js?v=1789569376"></script>
+  <script src="script.js?v=1789569376"></script>
+  <script src="hello-raster.js?v=1789569376"></script>
+
+  <!-- Le verre en WebGL. Chargé en module et en dernier : si l'import ou
+       le contexte échoue, mountGlass rend null, la classe n'est jamais
+       posée et le "hello" SVG reste tel quel. -->
+  <script type="module">
+    import { mountGlass } from "./hello-glass.js?v=1789569376";
+    const hello = document.getElementById("hello");
+    const go = () => {
+      try {
+        if (hello && mountGlass(hello, "hello")) {
+          hello.classList.add("hello--gl");
+        }
+      } catch (e) {
+        /* rien à faire : le rendu SVG est déjà en place */
+      }
+    };
+    /* Pacifico doit être chargé, sinon le champ de hauteur est celui
+       d'un serif de secours. */
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('100px "Pacifico"').then(go).catch(go);
+    } else { go(); }
+  </script>
 </body>
 </html>
