@@ -545,10 +545,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
      à ras, les lettres et le halo se faisaient couper. Ces quatre valeurs
      et les deux du module sont un seul jeu — changer l'un sans l'autre
      décale le mot dans sa boîte. */
-  left: -10%;
-  top: -22%;
-  width: 120%;
-  height: 144%;
+  left: -25%;
+  top: -45%;
+  width: 150%;
+  height: 190%;
   pointer-events: none;
 }
 

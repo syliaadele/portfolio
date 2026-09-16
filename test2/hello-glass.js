@@ -175,8 +175,21 @@ const GLASS_FRAG = `
   uniform vec2 uTexel, uMouse, uPoint;
   uniform float uThick, uRefract, uDisp, uIrid, uRefl, uHover;
   uniform float uPower, uAspect, uClear, uDark;
+  uniform float uBurst;
+  uniform vec2 uBurstPt;
 
   vec3 sky(vec2 uv) { return texture2D(uSky, clamp(uv, 0.0015, 0.9985)).rgb; }
+
+  /* Bruit de valeur, pour que la rupture suive une découpe organique et
+     non une frontière géométrique. Un film qui éclate se déchire selon
+     ses propres faiblesses, pas selon un cercle net. */
+  float bhash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float bnoise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(bhash(i), bhash(i + vec2(1,0)), f.x),
+               mix(bhash(i + vec2(0,1)), bhash(i + vec2(1,1)), f.x), f.y);
+  }
   float field(vec2 uv) { return texture2D(uField, uv).a; }
 
   /* LE PROFIL, et c'est lui qui décide si on lit du verre ou un voile.
@@ -221,18 +234,88 @@ const GLASS_FRAG = `
     vec2 wuv = uv - normalize(dv + 1e-5) * ring * 0.030 * uHover
                     / vec2(uAspect, 1.0);
 
-    float cover = texture2D(uMask, wuv).a;
+    /* LA DÉCHIRURE D'UNE MEMBRANE, pas un découpage.
+
+       Les deux essais précédents partitionnaient l'espace — damier, puis
+       Voronoï — et une partition donne toujours des morceaux à coutures
+       droites. C'était le défaut de fond : ça se lisait comme du verre
+       brisé ou une mosaïque, jamais comme du caoutchouc.
+
+       Ici il n'y a plus de morceaux du tout. Une déchirure part du point
+       de clic et se propage ; derrière son front, la membrane se rétracte
+       vers l'extérieur en se froissant, comme une baudruche dont la peau
+       fuit le trou. Le front lui-même est irrégulier — bruit sur le rayon,
+       en fonction de la direction — donc le bord de la déchirure ondule
+       au lieu d'être un cercle.
+
+       C'est ce qui produit les bourrelets : la peau tirée vers le dehors
+       s'entasse au bord du trou, exactement comme du vrai caoutchouc. */
+    vec2 muv = wuv;
+
+    /* Nommé toPt et non d : la dispersion déclare son propre float d plus
+       bas dans la fonction, et GLSL refuse la redéfinition. */
+    vec2 A = vec2(uAspect, 1.0);
+    vec2 toPt = (uv - uBurstPt) * A;
+    float bd = length(toPt);
+    vec2 dir = toPt / max(bd, 1e-4);
+    vec2 perp = vec2(-dir.y, dir.x);
+
+    float skin = 1.0;
+    if (uBurst > 0.0) {
+      /* Deux bruits : un angulaire, qui rend le front ondulant, et un
+         positionnel, qui l'empêche d'être lisse à l'échelle fine. */
+      float jitter = (bnoise(dir * 2.6 + 13.0) - 0.5) * 0.34
+                   + (bnoise(uv * 5.5) - 0.5) * 0.14;
+      float torn = uBurst * 1.75 + jitter - bd;
+
+      if (torn > 0.0) {
+        /* Plus une zone a été déchirée tôt, plus elle a reculé. Lire en
+           amont du déplacement fait apparaître la matière poussée vers le
+           dehors. */
+        /* 1.5 et non 2.3 : la peau allait plus loin que le canvas ne
+           pouvait la suivre, et agrandir celui-ci jusque-là coûtait la
+           moitié des frames. Raccourcie, sa course tient presque
+           entièrement dans le cadre. */
+        float pull = torn * 1.5;
+        float ripple = sin(atan(toPt.y, toPt.x) * 7.0 + uBurst * 5.0) * torn * 0.10;
+        muv -= (dir * pull - perp * ripple) / A;
+
+        /* La peau s'amincit en se tendant, puis cède. */
+        skin = 1.0 - smoothstep(0.04, 0.62, torn);
+      }
+    }
+
+    float cover = texture2D(uMask, muv).a * skin;
     if (cover < 0.004) discard;   /* hors des lettres : le CSS passe */
+
+    /* Filet de sécurité : le front dépend d'un bruit, donc rien ne
+       garantit qu'il balaie TOUS les pixels. Ce fondu sur le dernier
+       quart ne se voit pas — il ne reste alors que des bribes au bord du
+       champ — mais il assure que l'écran est net à la fin. */
+    if (uBurst > 0.0) {
+      cover *= 1.0 - smoothstep(0.82, 1.0, uBurst);
+
+      /* Fondu sur le bord du canvas. Le canvas a beau être large, il a
+         une fin, et la peau la dépasse : sans ce fondu elle s'arrêtait
+         net sur une ligne droite, ce qui se lisait comme un cadre. Elle
+         se dissout maintenant dans la bordure.
+
+         Uniquement pendant l'éclatement : au repos le mot est loin des
+         bords et n'a aucune raison de pâlir. */
+      vec2 edge = min(uv, 1.0 - uv);
+      cover *= smoothstep(0.0, 0.11, min(edge.x, edge.y));
+      if (cover < 0.004) discard;
+    }
 
     float dith = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)))
                   * 43758.5453) - 0.5) / 255.0;
 
     vec2 e = uTexel * 5.0;
-    float sR = field(wuv + vec2(e.x, 0.0)) + dith;
-    float sL = field(wuv - vec2(e.x, 0.0)) + dith;
-    float sU = field(wuv + vec2(0.0, e.y)) + dith;
-    float sD = field(wuv - vec2(0.0, e.y)) + dith;
-    float hc = field(wuv) + dith;
+    float sR = field(muv + vec2(e.x, 0.0)) + dith;
+    float sL = field(muv - vec2(e.x, 0.0)) + dith;
+    float sU = field(muv + vec2(0.0, e.y)) + dith;
+    float sD = field(muv - vec2(0.0, e.y)) + dith;
+    float hc = field(muv) + dith;
 
     /* Amplification abaissée de 9 à 6.5 : la découpe du champ par la
        lettre a raidi toutes les pentes, bord extérieur compris. À
@@ -323,7 +406,8 @@ const GLASS_FRAG = `
     float pdith = (fract(sin(dot(gl_FragCoord.yx, vec2(39.3468, 11.135)))
                    * 24634.6345) - 0.5) * 0.020;
     vec3 iridAll = iridescence(clamp(N.z, 0.0, 1.0),
-                               0.30 + prof(hc) * 0.95 + pdith + g * 1.4 * uHover);
+                               0.30 + prof(hc) * 0.95 + pdith + g * 1.4 * uHover
+                               + max(uBurst, 0.0) * 2.6);
     glass = mix(glass, glass * 0.62 + iridAll * 0.72,
                 clamp(uIrid * (0.26 + 0.74 * F), 0.0, 1.0));
     glass *= 1.0 - smoothstep(0.15, 0.75, F) * 0.16;
@@ -378,8 +462,24 @@ const GLASS_FRAG = `
 
    style.css place .hello-gl avec exactement ces valeurs en négatif — les
    deux jeux ne font qu'un, changer l'un sans l'autre décale le mot. */
-const PAD_X = 0.10;
-const PAD_Y = 0.22;
+/* Élargies pour l'éclatement. Au repos, 10% / 22% suffisaient : il
+   fallait juste de quoi loger le halo. Mais la peau qui se rétracte
+   parcourt plus de mille pixels avant de s'effacer, et elle se faisait
+   couper à 120px — soit au dixième de sa course, ce qui se voyait comme
+   une gouttière autour du mot.
+
+   Couvrir toute la course demanderait un canvas sept fois plus grand.
+   Essayé : 190% x 260% de la boîte, et la page tombait de 57 à 8-47 fps
+   sur deux mesures. Le mot est très large, donc lui donner de la marge
+   horizontale coûte beaucoup de pixels, rendus en permanence pour un
+   effet occasionnel.
+
+   D'où ce compromis : une marge qui double celle du repos, la course de
+   la peau raccourcie pour qu'elle s'y déroule presque entière, et le
+   fondu de bord dans le shader pour le reste. Ce qui se voyait n'était
+   pas la fin prématurée, c'était la COUPE FRANCHE sur une ligne droite. */
+const PAD_X = 0.25;
+const PAD_Y = 0.45;
 
 /* Descente du mot dans sa boîte, en pixels CSS.
 
@@ -452,6 +552,7 @@ export function mountGlass(hello, word) {
     uThick: { value: 0.62 }, uRefract: { value: 0.82 }, uDisp: { value: 0.40 },
     uIrid: { value: 0.66 }, uRefl: { value: 0.70 }, uHover: { value: 0.70 },
     uPower: { value: 0 }, uAspect: { value: 1 },
+    uBurst: { value: 0 }, uBurstPt: { value: new THREE.Vector2(0.5, 0.5) },
     /* Part du ciel RÉEL laissée visible à travers le corps plat. */
     uClear: { value: 0.52 }, uDark: { value: 0 },
   };
@@ -635,6 +736,44 @@ export function mountGlass(hello, word) {
      renderer doit cesser. Sans ce drapeau, le recuit du ciel au scroll
      et le redimensionnement continuaient d'appeler render() sur un
      contexte mort — d'où une exception dans three au premier scroll. */
+  /* L'ÉCLATEMENT AU CLIC — une seule horloge, lue par frame().
+
+     Tenir l'état dans un horodatage plutôt que dans un compteur incrémenté
+     par frame : la boucle se gare et se réveille, et un compteur aurait
+     dérivé au premier réveil tardif. La phase se déduit du temps écoulé,
+     donc elle est juste quelle que soit la cadence.
+
+     Le dépassement au regonflage laisse uBurst passer sous zéro : le mot
+     se gonfle un peu au-delà de son repos avant de s'y poser. */
+  /* Assez long pour qu'on VOIE la déchirure courir. À 430ms l'effet
+     était juste — une baudruche claque vite — mais il se lisait comme une
+     disparition soudaine : on n'avait le temps de percevoir ni le front
+     qui progresse ni la peau qui recule. 900ms restait court pour l'œil,
+     d'où ce dernier cran.
+
+     La courbe reste en u², donc l'allongement profite surtout au début :
+     la déchirure s'ouvre lentement puis emporte tout. C'est là que se
+     trouve ce qu'il y a à regarder. */
+  const BURST_MS = 1750;
+  /* Durée de l'ABSENCE, pas du regonflage : le mot est parti pendant ce
+     temps, puis BACK_MS le remplit. Du clic au mot entier il s'écoule
+     donc 1750 + 3000 + 1150, soit un peu moins de six secondes. */
+  const GONE_MS = 2000;
+  const BACK_MS = 2000;   /* regonflage élastique */
+  let burstAt = 0;
+  const THICK = U.uThick.value;   /* galbe au repos, cible du regonflage */
+
+  /* Élastique, pas un simple dépassement. Un ballon qu'on gonfle passe
+     la taille visée, se retend, repasse, et s'y pose en deux ou trois
+     oscillations décroissantes — c'est cette suite qui le fait lire comme
+     une baudruche plutôt que comme une image qui grandit. */
+  const elasticOut = (u) => {
+    if (u <= 0) return 0;
+    if (u >= 1) return 1;
+    const p = 0.45;
+    return Math.pow(2, -9 * u) * Math.sin((u - p / 4) * (2 * Math.PI) / p) + 1;
+  };
+
   let dead = false;
   let running = false, raf = 0, visible = true, box = null;
 
@@ -646,6 +785,38 @@ export function mountGlass(hello, word) {
 
   function frame() {
     raf = 0;
+
+    let bursting = false;
+    if (burstAt) {
+      const e = performance.now() - burstAt;
+      bursting = true;
+      if (e < BURST_MS) {
+        /* Accélération, et non freinage. Avec un ease-out les éclats
+           partaient à pleine vitesse dès le premier instant : le mot
+           disparaissait en 150ms sans qu'on voie la rupture. Des débris
+           sont lancés d'un coup puis emportés. */
+        const u = e / BURST_MS;
+        U.uBurst.value = u * u;
+        U.uThick.value = THICK;
+      } else if (e < BURST_MS + GONE_MS) {
+        U.uBurst.value = 1;
+        U.uThick.value = 0;   /* prêt à se remplir */
+      } else {
+        /* Le regonflage n'est PAS l'éclatement à l'envers : les éclats
+           sont partis, ils ne reviennent pas.
+
+           Et ce n'est pas non plus une mise à l'échelle : le mot revient
+           d'emblée à sa taille, c'est son VOLUME qui enfle. Le galbe part
+           de zéro — une peau plate, sans biseau ni Fresnel, à peine
+           visible — et monte jusqu'à sa valeur de repos. C'est ce que
+           fait une baudruche : elle ne grandit pas depuis un point, elle
+           se remplit. */
+        const u = (e - BURST_MS - GONE_MS) / BACK_MS;
+        U.uBurst.value = 0;
+        if (u >= 1) { U.uThick.value = THICK; burstAt = 0; bursting = false; }
+        else U.uThick.value = THICK * elasticOut(u);
+      }
+    }
     pvel += (want - power) * STIFF; pvel *= DAMP; power += pvel;
     vx += (px - cx) * STIFF; vx *= DAMP; cx += vx;
     vy += (py - cy) * STIFF; vy *= DAMP; cy += vy;
@@ -657,7 +828,8 @@ export function mountGlass(hello, word) {
        parti". Un pointeur posé sur une lettre tient le ressort à
        l'équilibre : sans ce test on brûlerait une frame toutes les 16ms
        pour redessiner une image qui ne change plus. */
-    const still = Math.abs(want - power) < 0.002 && Math.abs(pvel) < 0.002
+    const still = !bursting
+               && Math.abs(want - power) < 0.002 && Math.abs(pvel) < 0.002
                && Math.abs(px - cx) < 0.002 && Math.abs(py - cy) < 0.002;
     if (still) { running = false; return; }
     raf = requestAnimationFrame(frame);
@@ -683,7 +855,28 @@ export function mountGlass(hello, word) {
   }
   const release = () => { want = 0; wake(); };
 
-  if (FINE) addEventListener("mousemove", onMove, { passive: true });
+  /* Le clic ne compte que sur une lettre : le canvas est en
+     pointer-events:none et déborde largement du mot, donc sans ce test on
+     ferait éclater le verre en cliquant dans le vide autour. Un éclatement
+     déjà en cours n'est pas relancé — sinon un double-clic figerait le mot
+     dans son absence. */
+  function onDown(e) {
+    if (dead || burstAt) return;
+    box = box || hello.getBoundingClientRect();
+    const bx = (e.clientX - box.left) / box.width;
+    const by = (e.clientY - box.top) / box.height;
+    const nx = (bx + PAD_X) / (1 + PAD_X * 2);
+    const ny = (by + PAD_Y) / (1 + PAD_Y * 2);
+    if (bx < 0 || bx > 1 || by < 0 || by > 1 || !onLetter(nx, ny)) return;
+    U.uBurstPt.value.set(nx, 1 - ny);
+    burstAt = performance.now();
+    wake();
+  }
+
+  if (FINE) {
+    addEventListener("mousemove", onMove, { passive: true });
+    addEventListener("pointerdown", onDown, { passive: true });
+  }
   document.addEventListener("mouseleave", release);
   addEventListener("blur", release);
   addEventListener("scroll", () => { box = null; }, { passive: true });
