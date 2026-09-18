@@ -12,8 +12,8 @@
 
   <!-- Shared art direction. These live in test2/ while the new site is
        still being built there; when it moves to the root, so do they. -->
-  <link rel="stylesheet" href="test2/sky.css?v=1789576112" />
-  <link rel="stylesheet" href="test2/style.css?v=1789576112" />
+  <link rel="stylesheet" href="test2/sky.css?v=1789736721" />
+  <link rel="stylesheet" href="test2/style.css?v=1789736721" />
 
   <style>
     /* Page-specific layout only — everything else comes from style.css */
@@ -346,16 +346,16 @@
     </svg>
   </div>
 
-  <script src="test2/sky.js?v=1789576112"></script>
-  <script src="test2/nav.js?v=1789576112"></script>
-  <script src="test2/sound.js?v=1789576112"></script>
-  <script src="test2/hello-raster.js?v=1789576112"></script>
+  <script src="test2/sky.js?v=1789736721"></script>
+  <script src="test2/nav.js?v=1789736721"></script>
+  <script src="test2/sound.js?v=1789736721"></script>
+  <script src="test2/hello-raster.js?v=1789736721"></script>
 
   <!-- Le verre WebGL, comme sur /test2/. Chargé en module et en dernier :
        si l'import ou le contexte échoue, mountGlass rend null, la classe
        n'est jamais posée et le "hello" SVG cuit reste tel quel. -->
   <script type="module">
-    import { mountGlass } from "./test2/hello-glass.js?v=1789576112";
+    import { mountGlass } from "./test2/hello-glass.js?v=1789736721";
     const hello = document.getElementById("hello");
     const go = () => {
       try {
