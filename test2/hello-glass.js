@@ -554,33 +554,25 @@ const FIG_LIFT = 0.18;
 const FIG_GROW = 1.40;
 const FIG_LIFT_GROWN = FIG_LIFT + (FIG_GROW - 1) * FIG_H / 2;
 
-/* Abaissement des deux mêmes figures, en PIXELS D'ÉCRAN et non en parts
-   de la taille de police — c'est une place voulue à l'œil, pas une
-   proportion du dessin.
+/* Abaissement des deux figures agrandies, EN PART DE LA TAILLE DE POLICE
+   et non en pixels d'écran.
 
-   L'unité est celle de DROP_PX et elle est exacte : .hello est mis à
-   l'échelle par un transform, mais renderer.setSize est appelé avec
-   updateStyle à false, donc le tampon garde DPR pixels par pixel CSS
-   affiché quelle que soit cette échelle.
+   Il l'a d'abord été en pixels, et c'était une erreur de nature, pas de
+   valeur : le module sert deux pages dont le mot n'a pas la même taille —
+   140 px sur la page d'accueil, 418 dans le héros du nouveau site. Une
+   descente de 53 px valait donc le tiers du diamètre du smiley d'un côté
+   et le dixième de l'autre. Réglée sur l'une, elle était nécessairement
+   fausse sur l'autre, et elle l'a été dans les deux sens à la fois.
 
-   À cette profondeur le bas de la figure passe derrière la pastille, qui
-   est au-dessus dans l'ordre d'empilement et porte son propre flou : le
-   verre s'y estompe au lieu de la heurter. C'est le recouvrement qui
-   borne la valeur — au-delà d'une soixantaine, le menton du smiley
-   ressort SOUS la pastille, et ce qui se lisait comme une figure posée
-   derrière redevient deux objets qui se croisent.
+   Rapportée à la taille du mot, une seule valeur convient aux deux, comme
+   pour tout le reste du fichier.
 
-   LE SMILEY A SA PROPRE VALEUR, parce qu'il a une bouche. Devenu
-   concentrique au visage, son sourire creuse bas, et la pastille a vite
-   fait de le recouvrir : à 50 de descente pour un sourire encore posé au
-   milieu du cercle, il n'en restait que les deux crochets des extrémités.
-   Le sourire a depuis été remonté de son côté, ce qui a rendu de la
-   marge ; les deux réglages se surveillent donc l'un l'autre, et c'est le
-   point bas du sourire — et non le menton — qui borne celui-ci. La
-   marguerite n'a rien à protéger dans son bas et garde sa propre
-   descente. */
-const FIG_DROP = 50;
-const FIG_DROP_FACE = 53;
+   0.21 se lit en regard de FIG_LIFT_GROWN, qui vaut 0.35 : la figure
+   descend de la différence, soit 0.14 de taille de police sous le point où
+   le mot est posé. Et comme l'encre du mot est elle-même 0.2255 au-dessus
+   de ce point, la figure finit 0.085 SOUS le centre de cette encre —
+   posée un peu plus bas que le mot, ce qui est l'effet cherché. */
+const FIG_DROP = 0.21;
 
 /* Le facteur d'échelle est appliqué aux COORDONNÉES, jamais par
    c.scale(). Le flou de c.filter ne suit pas la matrice du contexte de
@@ -631,7 +623,7 @@ const FIGURES = [
   {
     name: "smiley",
     lift: FIG_LIFT_GROWN,
-    drop: FIG_DROP_FACE,
+    drop: FIG_DROP,
     /* Biseau ramené à celui du mot, alors que le disque seul en
        supporterait un plus large : les yeux et la bouche sont désormais
        aussi minces qu'un trait de lettre, et un biseau plus large que
@@ -929,8 +921,8 @@ export function mountGlass(hello, word) {
       c.globalCompositeOperation = mode;
       c.fillStyle = "#fff"; c.strokeStyle = "#fff";
       c.translate(w / 2,
-                  h / 2 + ((DROP_PX + (fig.drop || 0)) * DPR
-                           - (fig.lift || 0) * size) * k);
+                  h / 2 + (DROP_PX * DPR
+                           + ((fig.drop || 0) - (fig.lift || 0)) * size) * k);
       fig.draw(c, size * k, word);
       c.restore();
     };
