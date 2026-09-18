@@ -5,21 +5,39 @@ Site portfolio statique (HTML / CSS / JS) hébergé sur GitHub Pages, accessible
 ## 📁 Structure
 ```
 portfolio/
-├── index.html      # Contenu du site
-├── style.css       # Styles (couleurs, mise en page)
-├── script.js       # Menu mobile + animations
+├── index.html      # La page d'accueil actuelle — « site en construction »
+├── test2/          # Le nouveau site, en cours de construction
+│   ├── index.html  # Sa page d'accueil
+│   ├── work/       # Une page par projet
+│   ├── media/      # Images, en webp, deux tailles par visuel
+│   ├── style.css   # Mise en page et composants, pour les deux sites
+│   ├── sky.css     # Le ciel et ses nuages
+│   ├── work.css    # Les pages de projet
+│   ├── sky.js      # Le ciel interactif
+│   ├── script.js   # Le défilement, le héros, les interactions
+│   ├── hello-glass.js   # Le « hello » en verre, et les figures qui lui succèdent
+│   ├── hello-raster.js  # Son repli sans WebGL
+│   ├── sun3d.js    # Le soleil, chargé à la demande
+│   ├── nav.js      # Le menu
+│   └── sound.js    # L'ambiance sonore
+├── tools/          # Outils de build ; rien d'ici n'est servi au visiteur
 ├── CNAME           # Domaine personnalisé (syliaadele.com)
 └── .nojekyll       # Désactive le traitement Jekyll de GitHub
 ```
 
-## ✏️ Personnaliser le contenu
-Tout se modifie dans `index.html` :
-- **Textes** : présentation, projets, compétences, contact.
-- **Email** : remplace `contact@syliaadele.com` (balise `<a href="mailto:...">`).
-- **Réseaux sociaux** : remplace les `href="#"` de la section Contact par tes vrais liens.
-- **Ta photo** : ajoute ton image dans le dossier (ex. `photo.jpg`) puis remplace le bloc
-  `<div class="photo-placeholder">SA</div>` par `<img src="photo.jpg" alt="Sylia Adèle" class="about-photo-img" />`.
-- **Couleurs** : variables `--c1`, `--c2`, `--c3`, `--c4` en haut de `style.css`.
+La page d'accueil et le nouveau site **partagent tout `test2/`** : une
+modification dans ce dossier se voit sur les deux, il faut donc les regarder
+toutes les deux.
+
+## ✏️ Modifier le site
+- **Aperçu local** : `npm run dev`, ou double-clic sur
+  « Previsualiser le portfolio.command ».
+- **Textes** : dans le `index.html` concerné. Les traductions vivent dans
+  l'attribut `data-fr` de chaque élément ; l'anglais est le contenu écrit.
+- **Couleurs et rythme** : les variables en haut de `test2/style.css`.
+- **Cache** : chaque feuille et chaque script est appelé avec `?v=<horodatage>`.
+  Après une modification, remplacer cette valeur partout par une nouvelle,
+  sinon les navigateurs continuent de servir l'ancien fichier.
 
 ## 🚀 Mise en ligne (GitHub Pages)
 
