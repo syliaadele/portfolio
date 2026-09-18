@@ -493,6 +493,282 @@ const PAD_Y = 0.45;
    50%. Cette descente rattrape une partie de cet écart. */
 const DROP_PX = 30;
 
+/* ---------------------------------------------------------------
+   LA ROUE DES FIGURES.
+
+   Le verre ne sait rien du mot : il ne lit qu'une silhouette (le masque)
+   et son champ de hauteur. N'importe quelle forme pleine traverse donc la
+   même machinerie — d'où la roue. Le mot éclate, une figure prend sa
+   place, elle éclate à son tour, et on revient au mot.
+
+   Chaque figure dessine dans un repère qui lui est propre, centré sur
+   l'origine, que `fit` ramène à la place qu'occuperait le mot. Deux
+   règles, et ce ne sont pas des conventions de style :
+
+   1. TOUT LE PLEIN EN UN SEUL fill(). Le champ est redécoupé par la
+      figure en `destination-in` ; un second fill() dans ce mode
+      effacerait ce que le premier vient de garder. Les lobes se
+      réunissent donc dans un seul tracé, que le remplissage nonzero
+      fusionne.
+
+   2. LES TROUS APRÈS, en `destination-out`. Ils se soustraient du masque
+      comme du champ, et le biseau se forme sur leur bord exactement
+      comme sur le contour : c'est ce qui donne aux yeux du smiley leur
+      épaisseur de verre plutôt qu'un air de trou découpé.
+   --------------------------------------------------------------- */
+const TAU = Math.PI * 2;
+
+/* Taille des figures, en parts de la taille de POLICE du mot — pas de sa
+   largeur. Le mot fait environ 0.75 de hauteur d'encre pour 2.4 de large ;
+   une figure isolée doit être un peu plus haute que cette encre pour
+   peser autant, sans descendre plus bas qu'elle : la pastille "site en
+   construction" tient juste sous la boîte, et à 0.88 le menton du smiley
+   la touchait. */
+/* `g` est le dépassement que s'accorde une figure. Le nuage est large et
+   plein, il remplit sa part à 1 ; le smiley et la marguerite sont un
+   disque et une étoile de traits, qui pèsent moins à surface égale et
+   demandent à monter d'un cinquième. Ce dépassement se paie en
+   remontée — voir FIG_LIFT — sans quoi il descendrait tout entier vers
+   la pastille. */
+const FIG_H = 0.85, FIG_W = 2.0;
+const fit = (S, w, h, g = 1) =>
+  Math.min((FIG_H * g * S) / h, (FIG_W * g * S) / w);
+
+/* REMONTÉE DES FORMES, en parts de la taille de police.
+
+   Le mot est posé en textBaseline "middle", qui centre le cadratin — pas
+   l'encre. Or "hello" n'a que des hampes et aucun jambage : son encre
+   occupe la moitié haute du cadratin, et une forme centrée sur le même
+   point tombe donc visiblement plus bas que lui. Mesuré à l'écran, l'écart
+   vaut un peu moins d'un cinquième de la taille de police. Sans cette
+   correction, chaque figure arrivait collée à la pastille alors que le mot
+   lui laisse de l'air. */
+const FIG_LIFT = 0.18;
+
+/* Remontée supplémentaire des deux figures agrandies. Grandir autour de
+   son centre les fait descendre autant qu'elles montent, et c'est par le
+   bas que la place manque. Un dépassement de 1.18 sur une boîte carrée
+   ajoute (1.18 - 1) x 0.85 / 2 de rayon, soit 0.076 de taille de police :
+   remonter d'autant laisse le menton exactement où il était et rend toute
+   la croissance vers le haut, où le mot a de la marge. */
+const FIG_GROW = 1.40;
+const FIG_LIFT_GROWN = FIG_LIFT + (FIG_GROW - 1) * FIG_H / 2;
+
+/* Abaissement des deux mêmes figures, en PIXELS D'ÉCRAN et non en parts
+   de la taille de police — c'est une place voulue à l'œil, pas une
+   proportion du dessin.
+
+   L'unité est celle de DROP_PX et elle est exacte : .hello est mis à
+   l'échelle par un transform, mais renderer.setSize est appelé avec
+   updateStyle à false, donc le tampon garde DPR pixels par pixel CSS
+   affiché quelle que soit cette échelle.
+
+   À cette profondeur le bas de la figure passe derrière la pastille, qui
+   est au-dessus dans l'ordre d'empilement et porte son propre flou : le
+   verre s'y estompe au lieu de la heurter. C'est le recouvrement qui
+   borne la valeur — au-delà d'une soixantaine, le menton du smiley
+   ressort SOUS la pastille, et ce qui se lisait comme une figure posée
+   derrière redevient deux objets qui se croisent.
+
+   LE SMILEY A SA PROPRE VALEUR, parce qu'il a une bouche. Devenu
+   concentrique au visage, son sourire creuse bas, et la pastille a vite
+   fait de le recouvrir : à 50 de descente pour un sourire encore posé au
+   milieu du cercle, il n'en restait que les deux crochets des extrémités.
+   Le sourire a depuis été remonté de son côté, ce qui a rendu de la
+   marge ; les deux réglages se surveillent donc l'un l'autre, et c'est le
+   point bas du sourire — et non le menton — qui borne celui-ci. La
+   marguerite n'a rien à protéger dans son bas et garde sa propre
+   descente. */
+const FIG_DROP = 50;
+const FIG_DROP_FACE = 53;
+
+/* Le facteur d'échelle est appliqué aux COORDONNÉES, jamais par
+   c.scale(). Le flou de c.filter ne suit pas la matrice du contexte de
+   façon garantie d'un moteur à l'autre : mis à l'échelle par la matrice,
+   le biseau d'une figure aurait pu sortir dans un rapport différent de
+   celui du mot. */
+const disc = (u, x, y, r) => {
+  const p = new Path2D();
+  p.arc(x * u, y * u, r * u, 0, TAU);
+  return p;
+};
+const oval = (u, x, y, rx, ry, rot) => {
+  const p = new Path2D();
+  p.ellipse(x * u, y * u, rx * u, ry * u, rot, 0, TAU);
+  return p;
+};
+const slab = (u, x, y, w, h) => {
+  const p = new Path2D();
+  p.rect(x * u, y * u, w * u, h * u);
+  return p;
+};
+/* Chaque morceau garde son propre sous-tracé : addPath ne relie rien, là
+   où enchaîner les arcs sur un même tracé tirerait une ligne d'un lobe au
+   suivant et ferait mentir le remplissage nonzero. */
+const union = (...parts) => {
+  const p = new Path2D();
+  for (const q of parts) p.addPath(q);
+  return p;
+};
+
+const FIGURES = [
+  {
+    name: "hello",
+    bevel: 0.045,
+    draw(c, S, word) {
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      c.font = S + "px Pacifico, cursive";
+      c.fillText(word, 0, 0);
+    },
+  },
+
+  /* Biseau plus large que celui du mot pour les trois formes : le trait
+     d'une lettre est mince et son biseau en occupe déjà la moitié, alors
+     qu'un disque de cette taille n'est presque que face plate. Au réglage
+     du mot, l'arête s'y réduisait à un liseré et la forme se lisait comme
+     une découpe de papier. */
+  {
+    name: "smiley",
+    lift: FIG_LIFT_GROWN,
+    drop: FIG_DROP_FACE,
+    /* Biseau ramené à celui du mot, alors que le disque seul en
+       supporterait un plus large : les yeux et la bouche sont désormais
+       aussi minces qu'un trait de lettre, et un biseau plus large que
+       leur demi-largeur les aurait noyés dans une pente sans fond
+       plat. */
+    bevel: 0.045,
+    draw(c, S) {
+      const u = fit(S, 100, 100, FIG_GROW);
+      c.fill(disc(u, 0, 0, 50));
+      c.globalCompositeOperation = "destination-out";
+      /* Yeux et sourire relevés du smiley donné en modèle, ramenés à un
+         visage de 100 de diamètre.
+
+         DEUX ÉCARTS avec ce que j'avais tracé, et le second est celui qui
+         se voyait. Les yeux ne sont pas ronds mais des ovales DEBOUT,
+         une fois et demie plus hauts que larges — c'est ce qui donne le
+         regard, un rond donne un bouton. Et surtout le sourire est bien
+         plus large : son cercle a 42 de rayon là où le mien en avait 30,
+         donc il s'ouvre sur 67 de large au lieu de 49, presque les deux
+         tiers du visage. L'ouverture angulaire, elle, était déjà la
+         bonne : le modèle court de 0.21 à 0.79 tour.
+
+         LE SOURIRE EST CONCENTRIQUE AU VISAGE, et c'est ce qui le fait
+         suivre le bord. Son cercle avait jusqu'ici son propre centre,
+         posé au-dessus du milieu du visage : plus grand et décentré, il
+         était donc plus PLAT que le contour, et l'écart au bord se
+         resserrait vers ses extrémités pendant qu'il se creusait sous le
+         menton — deux courbes qui se contredisent. Rendu au centre du
+         visage, il en est partout à la même distance et se lit comme un
+         croissant pris dans la rondeur.
+
+         Son rayon de 34 pour un visage de 50 est ce qui fixe à la fois sa
+         profondeur et sa largeur : il s'ouvre sur 57, les trois cinquièmes
+         du visage.
+
+         Il est ensuite REMONTÉ de 6, soit une dizaine de pixels d'écran à
+         la taille où la figure est rendue. Le rayon ne sert pas à ça : le
+         réduire d'autant aurait remonté le sourire en le rétrécissant du
+         même geste. C'est donc l'arc entier qui glisse vers le haut, et il
+         garde par là sa courbure — celle du visage — sans plus en être
+         partout à la même distance.
+
+         Ce décalage se juge sur le visage VISIBLE et non sur le dessin :
+         le menton passe derrière la pastille, donc un sourire posé au
+         milieu du cercle se lit tout en bas du peu qu'on en voit. Six est
+         ce qui reste d'un aller-retour — dix-huit, puis douze rendus :
+         à dix-huit, les extrémités montaient au-dessus du milieu du
+         visage et venaient friser les yeux. */
+      c.fill(union(oval(u, -17, -13, 6, 9.5, 0), oval(u, 17, -13, 6, 9.5, 0)));
+      const mouth = new Path2D();
+      mouth.arc(0, -6 * u, 34 * u, 0.16 * Math.PI, 0.84 * Math.PI);
+      c.lineWidth = 4.5 * u;
+      c.lineCap = "round";
+      c.stroke(mouth);
+    },
+  },
+
+  {
+    name: "flower",
+    lift: FIG_LIFT_GROWN,
+    drop: FIG_DROP,
+    /* Une marguerite est faite de traits, pas de masses : ses pétales ont
+       la largeur d'un trait de Pacifico, donc le biseau du mot. */
+    bevel: 0.042,
+    draw(c, S) {
+      const u = fit(S, 100, 100, FIG_GROW);
+      /* UNE MARGUERITE : dix pétales longs et étroits, séparés jusqu'au
+         cœur.
+
+         Les deux jets précédents en posaient cinq ou six, larges et
+         courts, et la fleur sortait en étoile arrondie : des lobes qui se
+         rejoignaient bien avant le centre ne laissaient qu'une vallée
+         peu profonde entre eux.
+
+         Ce qui sépare les pétales, c'est leur MINCEUR, pas leur nombre.
+         Reste à ne pas les affiner plus qu'il ne faut : à dix pétales de
+         6.5 de demi-largeur, le biseau occupait toute leur épaisseur, il
+         ne restait aucune face plate et la fleur sortait en fil de fer
+         irisé au lieu de verre. Neuf pétales laissent chacun deux degrés
+         de plus, donc 8 de demi-largeur — assez pour garder un corps —
+         sans que deux voisins se rejoignent nulle part entre le bout et
+         le disque central, qui est seul à les tenir. */
+      /* Le cœur est large — 18 de rayon pour des pétales qui partent de
+         10 — et c'est lui qui donne sa masse à la fleur. Au premier
+         essai il ne faisait que 14 : les pétales, séparés dès son bord,
+         flottaient autour d'un point et la marguerite se lisait comme une
+         couronne de perles. Sa lèvre tombe pile là où les voisins cessent
+         de se rencontrer, donc rien n'est perdu de la découpe. */
+      const parts = [disc(u, 0, 0, 18)];
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * TAU - Math.PI / 2;
+        parts.push(oval(u, Math.cos(a) * 30, Math.sin(a) * 30,
+                         8, 20, a - Math.PI / 2));
+      }
+      c.fill(union(...parts));
+      /* Le cœur, en creux. Il est jaune sur le modèle et le verre n'a pas
+         de couleur à donner : reste le trou, que le biseau cercle d'une
+         arête — le même geste que les yeux du smiley. */
+      c.globalCompositeOperation = "destination-out";
+      c.fill(disc(u, 0, 0, 8));
+    },
+  },
+
+  {
+    name: "cloud",
+    lift: FIG_LIFT,
+    bevel: 0.048,
+    draw(c, S) {
+      /* TROIS BOUFFÉES POSÉES SUR UNE MÊME LIGNE DE FOND.
+
+         Le premier nuage était une masse : ses bouffées se recouvraient
+         aux trois quarts et il n'en restait qu'un galet. Le deuxième a
+         gagné une échancrure à droite, mais sa petite bouffée de gauche
+         se noyait encore dans un socle haut d'un tiers de la figure :
+         le flanc gauche sortait droit, sur toute cette hauteur.
+
+         Ce qui manquait n'était pas une bosse de plus, c'était que
+         chaque bouffée DESCENDE jusqu'au fond. Les trois ont ici leur
+         point bas exactement sur la ligne y = 45 : le socle ne fait plus
+         que combler entre elles, ses coins tombent pile sur leur point de
+         tangence, et le contour est partout celui d'un cercle sauf le
+         plat du dessous. Il n'a même plus besoin de bouts ronds.
+
+         L'écartement reste la règle du deuxième jet — centres distants
+         d'environ neuf dixièmes de la somme des rayons — sans quoi la
+         grande bouffée avale ses voisines quelle que soit leur taille. */
+      const u = fit(S, 196, 92);
+      c.fill(union(
+        disc(u, -74, 19, 26),
+        disc(u, -10, -1, 46),
+        disc(u, 62, 11, 34),
+        slab(u, -74, 17, 136, 28)
+      ));
+    },
+  },
+];
+
 export function mountGlass(hello, word) {
   /* premultipliedAlpha reste à true, sa valeur par défaut, et ce n'est
      pas un détail. Le mélange normal de three.js écrit SRC_ALPHA /
@@ -561,17 +837,19 @@ export function mountGlass(hello, word) {
     uniforms: U, vertexShader: VERT, fragmentShader: GLASS_FRAG,
     transparent: true, depthTest: false })));
 
-  /* ---------- le mot, en deux textures ---------- */
+  /* ---------- la figure, en deux textures ---------- */
   let maskTex = null, fieldTex = null, hit = null, hitW = 0, hitH = 0;
   let W = 0, H = 0, boxW = 0;
+  /* Où en est la roue, et si le tour courant a déjà avancé d'un cran. */
+  let figure = 0, swapped = false;
 
   function build() {
     const box = hello.getBoundingClientRect();
     if (!box.width || !box.height) return false;
 
-    /* Le canvas est plus grand que la boîte ; le MOT, lui, reste
-       dimensionné sur la boîte, pas sur le canvas — sans quoi la marge
-       le grossirait d'autant. */
+    /* Le canvas est plus grand que la boîte ; la FIGURE, elle, reste
+       dimensionnée sur la boîte, pas sur le canvas — sans quoi la marge
+       la grossirait d'autant. */
     const cw = Math.round(box.width * (1 + PAD_X * 2));
     const ch = Math.round(box.height * (1 + PAD_Y * 2));
     renderer.setSize(cw, ch, false);
@@ -579,6 +857,21 @@ export function mountGlass(hello, word) {
     boxW = Math.round(box.width * DPR);
     U.uTexel.value.set(1 / W, 1 / H);
     U.uAspect.value = W / H;
+
+    paintFigure();
+
+    skyTarget.setSize(Math.max(2, W >> 1), Math.max(2, H >> 1));
+    U.uSky.value = skyTarget.texture;
+    bakeSky(box);
+    return true;
+  }
+
+  /* Les deux textures de la figure courante. Séparé de build() parce que
+     la roue les repeint sans que rien d'autre ne bouge : mêmes
+     dimensions, même ciel, seul le dessin change. */
+  function paintFigure() {
+    if (!W || !H) return;
+    const fig = FIGURES[figure];
 
     const mask = document.createElement("canvas");
     mask.width = W; mask.height = H;
@@ -598,7 +891,12 @@ export function mountGlass(hello, word) {
     field.width = FW; field.height = FH;
 
     /* La taille de POLICE n'est pas la largeur du MOT : "hello" en
-       Pacifico fait environ 2,4 fois sa taille de police. On mesure. */
+       Pacifico fait environ 2,4 fois sa taille de police. On mesure.
+
+       Elle est mesurée même quand la figure n'est pas le mot : c'est
+       l'unité commune de la roue. Une fleur cotée en parts de cette
+       taille garde le rapport que le mot a avec sa boîte, sur un
+       téléphone comme sur un écran large. */
     const ctx = mask.getContext("2d");
     const REF = 200;
     ctx.font = REF + "px Pacifico, cursive";
@@ -611,31 +909,45 @@ export function mountGlass(hello, word) {
        que de garde-fou, pas de valeur de travail. */
     const size = Math.min((boxW * 0.75 * REF) / wordW, H * 0.86);
 
-    const paint = (c, w, h, k) => {
-      c.clearRect(0, 0, w, h);
-      /* Ce rayon EST la largeur du biseau, le réglage le plus sensible du
-         fichier : trop grand, plus de face plate et le liseré s'étale en
-         contour peint. Mis à l'échelle avec la cible, pour que le biseau
-         garde la même largeur relative quelle que soit la résolution. */
-      const blur = size * 0.045 * k;
-      c.filter = blur > 0.5 ? "blur(" + blur + "px)" : "none";
-      c.fillStyle = "#fff";
-      c.textAlign = "center"; c.textBaseline = "middle";
-      c.font = (size * k) + "px Pacifico, cursive";
-      c.fillText(word, w / 2, h / 2 + DROP_PX * DPR * k);
-      c.filter = "none";
+    /* Ce rayon EST la largeur du biseau, le réglage le plus sensible du
+       fichier : trop grand, plus de face plate et le liseré s'étale en
+       contour peint. Mis à l'échelle avec la taille de police, pour que le
+       biseau garde la même largeur relative quelle que soit la résolution
+       — et pondéré par la figure, qui seule sait si elle est faite de
+       traits minces ou d'une masse pleine. K passe ensuite tout cela à la
+       demi-résolution du champ. */
+    const K = FW / W;
+    const bevel = size * fig.bevel;
+
+    /* Le seul point d'entrée des trois passes : il pose le repère — le
+       centre de la cible, descente comprise — et le mode de composition
+       du plein ; la figure ne connaît que son propre dessin. save()
+       rend le filtre, la transformation ET le mode que le tracé a pu
+       changer pour creuser ses trous. */
+    const paint = (c, w, h, k, mode) => {
+      c.save();
+      c.globalCompositeOperation = mode;
+      c.fillStyle = "#fff"; c.strokeStyle = "#fff";
+      c.translate(w / 2,
+                  h / 2 + ((DROP_PX + (fig.drop || 0)) * DPR
+                           - (fig.lift || 0) * size) * k);
+      fig.draw(c, size * k, word);
+      c.restore();
     };
+
+    /* le masque : net, c'est la silhouette */
     ctx.filter = "none";
-    ctx.fillStyle = "#fff";
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = size + "px Pacifico, cursive";
     ctx.clearRect(0, 0, W, H);
-    ctx.fillText(word, W / 2, H / 2 + DROP_PX * DPR);
+    paint(ctx, W, H, 1, "source-over");
 
+    /* le champ : la même figure, floutée */
     const fx = field.getContext("2d");
-    paint(fx, FW, FH, FW / W);
+    fx.clearRect(0, 0, FW, FH);
+    const blur = bevel * K;
+    fx.filter = blur > 0.5 ? "blur(" + blur + "px)" : "none";
+    paint(fx, FW, FH, K, "source-over");
 
-    /* LE CHAMP EST REDÉCOUPÉ PAR LA LETTRE, et c'est ce qui rend leur
+    /* LE CHAMP EST REDÉCOUPÉ PAR LA FIGURE, et c'est ce qui rend leur
        dessin aux boucles.
 
        Un flou gaussien ne connaît pas les contrepoinçons : dans le "e",
@@ -656,14 +968,9 @@ export function mountGlass(hello, word) {
        Le flou de la découpe est petit mais non nul : à zéro, le bord du
        champ épouserait l'escalier du masque et la normale y partirait en
        dents de scie. */
-    fx.globalCompositeOperation = "destination-in";
-    fx.filter = "blur(" + Math.max(2, size * 0.034 * (FW / W)) + "px)";
-    fx.fillStyle = "#fff";
-    fx.textAlign = "center"; fx.textBaseline = "middle";
-    fx.font = (size * (FW / W)) + "px Pacifico, cursive";
-    fx.fillText(word, FW / 2, FH / 2 + DROP_PX * DPR * (FW / W));
+    fx.filter = "blur(" + Math.max(2, bevel * (34 / 45) * K) + "px)";
+    paint(fx, FW, FH, K, "destination-in");
     fx.filter = "none";
-    fx.globalCompositeOperation = "source-over";
 
     if (maskTex) { maskTex.dispose(); fieldTex.dispose(); }
     maskTex = new THREE.CanvasTexture(mask);
@@ -682,11 +989,6 @@ export function mountGlass(hello, word) {
     const hx = hc.getContext("2d");
     hx.drawImage(mask, 0, 0, hitW, hitH);
     hit = hx.getImageData(0, 0, hitW, hitH).data;
-
-    skyTarget.setSize(Math.max(2, W >> 1), Math.max(2, H >> 1));
-    U.uSky.value = skyTarget.texture;
-    bakeSky(box);
-    return true;
   }
 
   /* Le ciel n'est PAS rendu par frame : une fois ici, et seulement quand
@@ -755,9 +1057,10 @@ export function mountGlass(hello, word) {
      la déchirure s'ouvre lentement puis emporte tout. C'est là que se
      trouve ce qu'il y a à regarder. */
   const BURST_MS = 1750;
-  /* Durée de l'ABSENCE, pas du regonflage : le mot est parti pendant ce
-     temps, puis BACK_MS le remplit. Du clic au mot entier il s'écoule
-     donc 1750 + 3000 + 1150, soit un peu moins de six secondes. */
+  /* Durée de l'ABSENCE, pas du regonflage : rien n'est là pendant ce
+     temps, puis BACK_MS remplit la figure SUIVANTE — c'est dans ce creux
+     que la roue tourne. Du clic à la figure entière il s'écoule donc
+     1750 + 2000 + 2000, soit un peu moins de six secondes. */
   const GONE_MS = 2000;
   const BACK_MS = 2000;   /* regonflage élastique */
   let burstAt = 0;
@@ -801,6 +1104,23 @@ export function mountGlass(hello, word) {
       } else if (e < BURST_MS + GONE_MS) {
         U.uBurst.value = 1;
         U.uThick.value = 0;   /* prêt à se remplir */
+
+        /* LA ROUE TOURNE ICI, et nulle part ailleurs.
+
+           Pendant cette absence le shader jette tous ses fragments — le
+           fondu sur uBurst éteint `cover` bien avant 1 — donc repeindre
+           le masque ne se voit pas : la figure suivante n'existe qu'au
+           regonflage, qui la remplit comme il remplissait le mot.
+
+           Au clic, ce serait la nouvelle figure qui éclaterait. À la
+           première frame du regonflage, la peinture des deux canvas et
+           l'envoi des textures tomberaient dans la frame qui doit
+           démarrer l'élastique. Ici, il y a deux secondes pour rien. */
+        if (!swapped) {
+          swapped = true;
+          figure = (figure + 1) % FIGURES.length;
+          paintFigure();
+        }
       } else {
         /* Le regonflage n'est PAS l'éclatement à l'envers : les éclats
            sont partis, ils ne reviennent pas.
@@ -870,6 +1190,7 @@ export function mountGlass(hello, word) {
     if (bx < 0 || bx > 1 || by < 0 || by > 1 || !onLetter(nx, ny)) return;
     U.uBurstPt.value.set(nx, 1 - ny);
     burstAt = performance.now();
+    swapped = false;
     wake();
   }
 
