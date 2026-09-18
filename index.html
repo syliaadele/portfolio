@@ -65,6 +65,18 @@
          to bring the content up — and drop --hello-drop by about half as
          much at the same time, or the word rises with it. */
       --hello-gap: 6rem;
+      /* Où se posent les figures de la roue (smiley, marguerite) quand le
+         mot a éclaté, en part de sa taille de police — voir FIG_DROP dans
+         hello-glass.js, qui vaut 0.21 par défaut.
+
+         Presque rien ici, alors que le héros du nouveau site laisse la
+         valeur par défaut : une figure est plus haute que l'encre du mot,
+         et sous ce mot-ci la pastille attend à quelques pixels. À la
+         valeur commune, le menton du smiley lui passait derrière sur les
+         deux tiers de sa hauteur. À 0.04, la figure tient tout entière
+         dans la place du mot, le bas arrivant juste au-dessus de la
+         pastille. */
+      --fig-drop: 0.04;
 
       position: relative;
       top: auto;

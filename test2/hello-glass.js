@@ -571,7 +571,17 @@ const FIG_LIFT_GROWN = FIG_LIFT + (FIG_GROW - 1) * FIG_H / 2;
    descend de la différence, soit 0.14 de taille de police sous le point où
    le mot est posé. Et comme l'encre du mot est elle-même 0.2255 au-dessus
    de ce point, la figure finit 0.085 SOUS le centre de cette encre —
-   posée un peu plus bas que le mot, ce qui est l'effet cherché. */
+   posée un peu plus bas que le mot, ce qui est l'effet cherché dans le
+   héros du nouveau site.
+
+   MAIS C'EST UNE VALEUR PAR PAGE, que --fig-drop peut reprendre, et la
+   proportion n'y suffisait pas : elle rend les deux pages cohérentes entre
+   elles, pas leurs mises en page identiques. Sous le mot de la page
+   d'accueil il y a une pastille à moins d'un dixième de taille de police,
+   et rien du tout sous celui du héros. Une figure « un peu plus basse que
+   le mot » passe donc derrière la pastille ici et flotte librement là-bas.
+   Le réglage vit avec la mise en page qui le motive, dans le CSS de la
+   page, à côté des autres (--hello-drop, --hello-gap). */
 const FIG_DROP = 0.21;
 
 /* Le facteur d'échelle est appliqué aux COORDONNÉES, jamais par
@@ -623,7 +633,7 @@ const FIGURES = [
   {
     name: "smiley",
     lift: FIG_LIFT_GROWN,
-    drop: FIG_DROP,
+    drop: true,
     /* Biseau ramené à celui du mot, alors que le disque seul en
        supporterait un plus large : les yeux et la bouche sont désormais
        aussi minces qu'un trait de lettre, et un biseau plus large que
@@ -684,7 +694,7 @@ const FIGURES = [
   {
     name: "flower",
     lift: FIG_LIFT_GROWN,
-    drop: FIG_DROP,
+    drop: true,
     /* Une marguerite est faite de traits, pas de masses : ses pétales ont
        la largeur d'un trait de Pacifico, donc le biseau du mot. */
     bevel: 0.042,
@@ -834,6 +844,8 @@ export function mountGlass(hello, word) {
   let W = 0, H = 0, boxW = 0;
   /* Où en est la roue, et si le tour courant a déjà avancé d'un cran. */
   let figure = 0, swapped = false;
+  /* Ce que la page demande comme descente ; FIG_DROP tant qu'elle se tait. */
+  let pageDrop = FIG_DROP;
 
   function build() {
     const box = hello.getBoundingClientRect();
@@ -849,6 +861,13 @@ export function mountGlass(hello, word) {
     boxW = Math.round(box.width * DPR);
     U.uTexel.value.set(1 / W, 1 / H);
     U.uAspect.value = W / H;
+
+    /* Lu ici et pas au montage : c'est la seule fonction que le
+       redimensionnement rappelle, donc une page qui changerait sa valeur
+       avec une media query serait suivie. */
+    const css = parseFloat(
+      getComputedStyle(hello).getPropertyValue("--fig-drop"));
+    pageDrop = Number.isFinite(css) ? css : FIG_DROP;
 
     paintFigure();
 
@@ -922,7 +941,8 @@ export function mountGlass(hello, word) {
       c.fillStyle = "#fff"; c.strokeStyle = "#fff";
       c.translate(w / 2,
                   h / 2 + (DROP_PX * DPR
-                           + ((fig.drop || 0) - (fig.lift || 0)) * size) * k);
+                           + ((fig.drop ? pageDrop : 0)
+                              - (fig.lift || 0)) * size) * k);
       fig.draw(c, size * k, word);
       c.restore();
     };
