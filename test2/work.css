@@ -96,8 +96,6 @@
   text-transform: uppercase;
 }
 
-.project-meta { color: var(--ink-2); letter-spacing: .12em; font-size: .72rem; }
-
 .project-tags {
   display: flex;
   flex-wrap: wrap;

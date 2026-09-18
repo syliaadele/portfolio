@@ -654,7 +654,7 @@ main { position: relative; z-index: 2; }
 /* hover still nudges the row right, now measured from the gutter */
 .row-btn:hover { background: var(--panel); padding-left: calc(var(--gutter) + .6rem); }
 
-.row-i, .row-cat, .row-year, .row-meta { color: var(--ink-2); letter-spacing: .08em; }
+.row-i, .row-meta { color: var(--ink-2); letter-spacing: .08em; }
 .row-meta { text-align: right; }
 
 .work-all {
@@ -680,21 +680,7 @@ main { position: relative; z-index: 2; }
   font-size: 1.15rem;
   color: var(--ink-2);
   justify-self: end;
-  transition: transform .4s var(--ease);
 }
-.row.open .row-mark { transform: rotate(45deg); }
-
-.row-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease); }
-.row.open .row-panel { grid-template-rows: 1fr; }
-.row-panel-in { overflow: hidden; }
-.row-panel-in > * {
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity .4s var(--ease) .08s, transform .4s var(--ease) .08s;
-}
-.row.open .row-panel-in > * { opacity: 1; transform: none; }
-.row-panel-in p { max-width: 62ch; margin: 0 0 1.1rem; padding: 0 var(--gutter); color: var(--ink-2); }
-.row-panel-in .chips { padding: 0 var(--gutter) 1.7rem; }
 
 .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
 .chips li {
@@ -1150,8 +1136,7 @@ body.custom-cursor, body.custom-cursor * { cursor: none; }
   .row-i { grid-area: i; align-self: start; padding-top: .45rem; }
   .row-title { grid-area: title; }
   .row-mark { grid-area: mark; align-self: start; }
-  .row-cat, .row-meta { grid-area: meta; text-align: left; }
-  .row-year { display: none; }
+  .row-meta { grid-area: meta; text-align: left; }
   .cursor { display: none; }
 }
 
